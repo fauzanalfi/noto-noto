@@ -114,3 +114,46 @@ function greet(name) {
 
 *Start by creating a new notebook or note using the sidebar. Happy note-taking!* 🚀
 `;
+
+// Count words in plain text extracted from markdown
+export function countWords(markdown) {
+  if (!markdown) return 0;
+  const text = markdown
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]+`/g, ' ')
+    .replace(/!\[.*?\]\(.*?\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[#*_~>|\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text ? text.split(/\s+/).length : 0;
+}
+
+// Export a single note as a .md file download
+export function exportNoteAsMarkdown(note) {
+  const content = note.title
+    ? `# ${note.title}\n\n${note.content || ''}`
+    : (note.content || '');
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(note.title || 'untitled').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Export all notes as a JSON backup download
+export function exportAllNotesAsJSON(notes) {
+  const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `noto-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}

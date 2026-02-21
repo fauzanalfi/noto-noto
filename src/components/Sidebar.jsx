@@ -29,6 +29,7 @@ export default function Sidebar({
   setActiveTag,
   allTags,
   noteCountByNotebook,
+  noteCountByTag,
   totalNotes,
   pinnedCount,
   trashedCount,
@@ -40,6 +41,8 @@ export default function Sidebar({
   onClose,
   theme,
   onThemeChange,
+  user,
+  onSignOut,
 }) {
   const [expandedCategories, setExpandedCategories] = useState({
     projects: true,
@@ -263,6 +266,7 @@ export default function Sidebar({
                   onClick={() => handleNavClick('tag', null, tag)}
                 >
                   #{tag}
+                  {noteCountByTag?.[tag] ? <span className="count">{noteCountByTag[tag]}</span> : null}
                 </button>
               ))}
             </div>
@@ -308,6 +312,31 @@ export default function Sidebar({
 
       {/* Theme Switcher */}
       <div className="sidebar-footer">
+        {/* User info */}
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '0 2px' }}>
+            {user.photoURL
+              ? <img src={user.photoURL} alt="" style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0 }} />
+              : <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'white', flexShrink: 0 }}>
+                  {user.displayName?.[0] || user.email?.[0] || '?'}
+                </div>
+            }
+            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user.displayName || user.email}
+            </span>
+            <button
+              onClick={onSignOut}
+              title="Sign out"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '4px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </button>
+          </div>
+        )}
         <div style={{
           display: 'flex',
           alignItems: 'center',

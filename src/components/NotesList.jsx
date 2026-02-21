@@ -1,6 +1,12 @@
-import { Search, Plus, SortDesc } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, Plus, Pin, ArrowUpDown, Trash2 } from 'lucide-react';
 import { formatDate, extractSnippet } from '../utils';
-import { Pin } from 'lucide-react';
+
+const SORT_OPTIONS = [
+  { id: 'updated', label: 'Last modified' },
+  { id: 'created', label: 'Date created' },
+  { id: 'az', label: 'Title A–Z' },
+];
 
 export default function NotesList({
   notes,
@@ -10,16 +16,75 @@ export default function NotesList({
   searchQuery,
   onSearchChange,
   title,
+  isTrash,
+  onEmptyTrash,
 }) {
+  const [sortBy, setSortBy] = useState('updated');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+
+  const sortedNotes = useMemo(() => {
+    const arr = [...notes];
+    if (sortBy === 'created') arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    else if (sortBy === 'az') arr.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    return arr;
+  }, [notes, sortBy]);
+
   return (
     <div className="notes-list-panel" style={{ position: 'relative' }}>
       {/* Header */}
       <div className="notes-list-header">
         <h2>{title || 'All Notes'}</h2>
-        <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>
-          {notes.length} note{notes.length !== 1 ? 's' : ''}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>
+            {notes.length} note{notes.length !== 1 ? 's' : ''}
+          </span>
+          {/* Sort button */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="toolbar-btn"
+              style={{ minWidth: 'auto', height: '26px', padding: '2px 6px' }}
+              onClick={() => setShowSortMenu((v) => !v)}
+              title={`Sort: ${SORT_OPTIONS.find((o) => o.id === sortBy)?.label}`}
+            >
+              <ArrowUpDown size={12} />
+            </button>
+            {showSortMenu && (
+              <>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onClick={() => setShowSortMenu(false)} />
+                <div className="context-menu" style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 9999 }}>
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      className={`context-menu-item ${sortBy === opt.id ? 'active' : ''}`}
+                      onClick={() => { setSortBy(opt.id); setShowSortMenu(false); }}
+                    >
+                      {opt.label}{sortBy === opt.id ? ' ✓' : ''}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Empty Trash action */}
+      {isTrash && notes.length > 0 && (
+        <div style={{ padding: '0 var(--space-md) var(--space-sm)' }}>
+          <button
+            onClick={onEmptyTrash}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              width: '100%', padding: '6px 10px', border: '1px solid #ef4444',
+              borderRadius: 'var(--radius-sm)', background: 'transparent',
+              color: '#ef4444', cursor: 'pointer', fontSize: 'var(--font-size-xs)',
+              fontFamily: 'var(--font-sans)', fontWeight: 500,
+            }}
+          >
+            <Trash2 size={13} /> Empty Trash ({notes.length})
+          </button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="search-box">
@@ -42,7 +107,7 @@ export default function NotesList({
             </p>
           </div>
         ) : (
-          notes.map((note) => (
+          sortedNotes.map((note) => (
             <div
               key={note.id}
               className={`note-card ${activeNoteId === note.id ? 'active' : ''}`}

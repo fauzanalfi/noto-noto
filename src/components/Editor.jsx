@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react';
+import { countWords } from '../utils';
 import {
   Bold, Italic, Strikethrough, Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus
@@ -141,6 +142,13 @@ export default function Editor({ note, onUpdateNote }) {
         placeholder="Start writing in Markdown..."
         spellCheck={false}
       />
+
+      {/* Word count bar */}
+      <div className="word-count-bar">
+        <span>{countWords(note.content).toLocaleString()} words</span>
+        <span>·</span>
+        <span>~{Math.max(1, Math.ceil(countWords(note.content) / 200))} min read</span>
+      </div>
     </div>
   );
 }

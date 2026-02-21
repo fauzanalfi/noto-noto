@@ -1,26 +1,31 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Menu, ArrowLeft, Pin, Trash2, RotateCcw, BookOpen,
-  Edit3, Eye, Columns, X, ChevronDown
+  Edit3, Eye, Columns, X, ChevronDown, Copy, Download,
+  Maximize2, Minimize2,
 } from 'lucide-react';
 import { useNotes } from './hooks/useNotes';
 import { useNotebooks } from './hooks/useNotebooks';
 import { useTheme } from './hooks/useTheme';
+import { useAuth } from './hooks/useAuth';
 import Sidebar from './components/Sidebar';
 import NotesList from './components/NotesList';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
 import EmptyState from './components/EmptyState';
-import { formatFullDate } from './utils';
+import QuickSwitcher from './components/QuickSwitcher';
+import LoginScreen from './components/LoginScreen';
+import { formatFullDate, exportNoteAsMarkdown, exportAllNotesAsJSON } from './utils';
 
 export default function App() {
   // Data hooks
+  const { user, signIn, signOut } = useAuth();
   const {
     notes, allTags, createNote, updateNote, deleteNote, restoreNote,
     permanentlyDeleteNote, togglePin, moveToNotebook, addTag, removeTag,
-    getFilteredNotes,
-  } = useNotes();
-  const { notebooks, createNotebook, renameNotebook, deleteNotebook, moveNotebookCategory } = useNotebooks();
+    getFilteredNotes, saving, emptyTrash, duplicateNote,
+  } = useNotes(user?.uid);
+  const { notebooks, createNotebook, renameNotebook, deleteNotebook, moveNotebookCategory } = useNotebooks(user?.uid);
   const { theme, setTheme } = useTheme();
 
   // UI state
@@ -36,6 +41,13 @@ export default function App() {
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [moveMenuPos, setMoveMenuPos] = useState({ top: 0, left: 0 });
   const moveMenuRef = useRef(null);
+  const [zenMode, setZenMode] = useState(false);
+  const [showQuickSwitcher, setShowQuickSwitcher] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exportMenuPos, setExportMenuPos] = useState({ top: 0, left: 0 });
+  const exportMenuRef = useRef(null);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [saveStatus, setSaveStatus] = useState(null);
 
   // Filtered notes
   const filteredNotes = useMemo(() => {
@@ -58,6 +70,14 @@ export default function App() {
     const counts = {};
     notes.filter((n) => !n.trashed).forEach((n) => {
       counts[n.notebookId] = (counts[n.notebookId] || 0) + 1;
+    });
+    return counts;
+  }, [notes]);
+
+  const noteCountByTag = useMemo(() => {
+    const counts = {};
+    notes.filter((n) => !n.trashed).forEach((n) => {
+      n.tags.forEach((t) => { counts[t] = (counts[t] || 0) + 1; });
     });
     return counts;
   }, [notes]);
@@ -121,16 +141,67 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleCreateNote]);
 
+  // Quick switcher (Ctrl/Cmd+K)
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowQuickSwitcher((v) => !v);
+      }
+      if (e.key === 'Escape') setShowQuickSwitcher(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // Reactive isMobile
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Save status indicator
+  const isFirstSaveRender = useRef(true);
+  useEffect(() => {
+    if (isFirstSaveRender.current) { isFirstSaveRender.current = false; return; }
+    if (saving) {
+      setSaveStatus('saving');
+    } else {
+      setSaveStatus('saved');
+      const t = setTimeout(() => setSaveStatus(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [saving]);
+
   // Get notebook name for active note
   const activeNoteNotebook = activeNote
     ? notebooks.find((nb) => nb.id === activeNote.notebookId)
     : null;
 
-  // Determine if we should show mobile editor
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const isMobile = windowWidth <= 768;
+
+  // Auth gate
+  const [loginError, setLoginError] = useState(null);
+  const handleSignIn = async () => {
+    try { await signIn(); setLoginError(null); }
+    catch (e) { setLoginError(e.message); }
+  };
+
+  if (user === undefined) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)', color: 'var(--text-tertiary)', fontFamily: 'var(--font-sans)' }}>
+        Loading…
+      </div>
+    );
+  }
+
+  if (user === null) {
+    return <LoginScreen onSignIn={handleSignIn} error={loginError} />;
+  }
 
   return (
-    <div className="app">
+    <div className={`app${zenMode ? ' zen-mode' : ''}`}>
       {/* Sidebar */}
       <Sidebar
         notebooks={notebooks}
@@ -153,6 +224,9 @@ export default function App() {
         onClose={() => setSidebarOpen(false)}
         theme={theme}
         onThemeChange={setTheme}
+        noteCountByTag={noteCountByTag}
+        user={user}
+        onSignOut={signOut}
       />
 
       {/* Mobile overlay */}
@@ -189,6 +263,8 @@ export default function App() {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               title={listTitle}
+              isTrash={activeView === 'trash'}
+              onEmptyTrash={emptyTrash}
             />
           </div>
 
@@ -299,6 +375,67 @@ export default function App() {
                   </button>
                 )}
 
+                {/* Save indicator */}
+                {saveStatus && (
+                  <span className="save-indicator">
+                    {saveStatus === 'saving' ? 'Saving…' : 'Saved ✓'}
+                  </span>
+                )}
+
+                {/* Duplicate note */}
+                <button
+                  className="toolbar-btn"
+                  onClick={() => {
+                    const copy = duplicateNote(activeNote.id);
+                    if (copy) setActiveNoteId(copy.id);
+                  }}
+                  title="Duplicate note"
+                >
+                  <Copy size={16} />
+                </button>
+
+                {/* Export */}
+                <div style={{ position: 'relative' }}>
+                  <button
+                    className="toolbar-btn"
+                    ref={exportMenuRef}
+                    onClick={() => {
+                      if (!showExportMenu && exportMenuRef.current) {
+                        const rect = exportMenuRef.current.getBoundingClientRect();
+                        setExportMenuPos({ top: rect.bottom + 4, left: rect.left });
+                      }
+                      setShowExportMenu((v) => !v);
+                    }}
+                    title="Export"
+                  >
+                    <Download size={16} />
+                  </button>
+                  {showExportMenu && (
+                    <>
+                      <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onClick={() => setShowExportMenu(false)} />
+                      <div className="context-menu" style={{ position: 'fixed', top: exportMenuPos.top, left: exportMenuPos.left, zIndex: 9999 }}>
+                        <button className="context-menu-item" onClick={() => { exportNoteAsMarkdown(activeNote); setShowExportMenu(false); }}>
+                          Export as Markdown
+                        </button>
+                        <button className="context-menu-item" onClick={() => { exportAllNotesAsJSON(notes); setShowExportMenu(false); }}>
+                          Backup all (JSON)
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="toolbar-divider" />
+
+                {/* Zen mode */}
+                <button
+                  className={`toolbar-btn ${zenMode ? 'active' : ''}`}
+                  onClick={() => setZenMode((v) => !v)}
+                  title={zenMode ? 'Exit zen mode' : 'Zen mode'}
+                >
+                  {zenMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                </button>
+
                 <div className="toolbar-divider" />
 
                 {/* View mode toggle */}
@@ -370,6 +507,19 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {/* Quick Switcher */}
+      {showQuickSwitcher && (
+        <QuickSwitcher
+          notes={notes}
+          onSelect={(id) => {
+            setActiveNoteId(id);
+            setShowQuickSwitcher(false);
+            setShowEditor(true);
+          }}
+          onClose={() => setShowQuickSwitcher(false)}
+        />
+      )}
     </div>
   );
 }
