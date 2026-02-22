@@ -149,5 +149,5 @@ Distributed under the [MIT License](LICENSE).
 ---
 
 <div align="center">
-  Made with ☕ by <a href="https://github.com/your-username">Fauzan</a>
+  Made with ☕ by <a href="https://github.com/fauzanalfi">Fauzan</a>
 </div>
