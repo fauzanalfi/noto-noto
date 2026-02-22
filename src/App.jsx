@@ -279,6 +279,17 @@ export default function App() {
                  style={!showEditor && isMobile ? { display: 'none' } : {}}>
               {/* Note Toolbar */}
               <div className="editor-toolbar">
+                {/* Back button — mobile only */}
+                {isMobile && (
+                  <button
+                    className="toolbar-btn mobile-back-btn"
+                    onClick={handleBackToList}
+                    title="Back to notes"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                )}
+
                 {/* Notebook info */}
                 <div style={{ position: 'relative' }}>
                   <button

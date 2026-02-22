@@ -1356,6 +1356,17 @@ body {
     display: none !important;
   }
 
+  /* Mobile back button — visible and prominent */
+  .mobile-back-btn {
+    color: var(--accent-primary) !important;
+    margin-right: var(--space-xs);
+    flex-shrink: 0;
+  }
+
+  .mobile-back-btn:hover {
+    background: rgba(124, 106, 239, 0.12) !important;
+  }
+
   /* Shrink toolbar buttons to fit screen */
   .toolbar-btn {
     min-width: 28px;
