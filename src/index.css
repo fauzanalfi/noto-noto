@@ -1326,7 +1326,10 @@ body {
 
   .editor-panel {
     position: fixed;
-    inset: 0;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: calc(var(--z-sidebar) - 2);
     background: var(--bg-primary);
   }
@@ -1345,6 +1348,35 @@ body {
   }
 
   .toolbar-btn span {
+    display: none;
+  }
+
+  /* Hide date in note toolbar on mobile */
+  .toolbar-date {
+    display: none !important;
+  }
+
+  /* Shrink toolbar buttons to fit screen */
+  .toolbar-btn {
+    min-width: 28px;
+    height: 28px;
+    padding: 2px 4px;
+  }
+
+  .view-mode-btn {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  /* Format toolbar in Editor: wrap to 2 rows so all icons fit */
+  .markdown-editor-wrap .editor-toolbar {
+    flex-wrap: wrap;
+    padding: var(--space-xs) var(--space-sm);
+    min-height: auto;
+    row-gap: 2px;
+    border-bottom: 1px solid var(--border-subtle) !important;
+  }
+
+  .markdown-editor-wrap .toolbar-divider {
     display: none;
   }
 

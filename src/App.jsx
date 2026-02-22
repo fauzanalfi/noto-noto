@@ -181,6 +181,11 @@ export default function App() {
 
   const isMobile = windowWidth <= 768;
 
+  // Force non-split view on mobile
+  useEffect(() => {
+    if (isMobile && viewMode === 'split') setViewMode('edit');
+  }, [isMobile]);
+
   // Auth gate
   const [loginError, setLoginError] = useState(null);
   const handleSignIn = async () => {
@@ -323,7 +328,7 @@ export default function App() {
                   )}
                 </div>
 
-                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>
+                <span className="toolbar-date" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>
                   {formatFullDate(activeNote.updatedAt)}
                 </span>
 
@@ -425,16 +430,18 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="toolbar-divider" />
-
-                {/* Zen mode */}
-                <button
-                  className={`toolbar-btn ${zenMode ? 'active' : ''}`}
-                  onClick={() => setZenMode((v) => !v)}
-                  title={zenMode ? 'Exit zen mode' : 'Zen mode'}
-                >
-                  {zenMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                </button>
+                {!isMobile && (
+                  <>
+                    <div className="toolbar-divider" />
+                    <button
+                      className={`toolbar-btn ${zenMode ? 'active' : ''}`}
+                      onClick={() => setZenMode((v) => !v)}
+                      title={zenMode ? 'Exit zen mode' : 'Zen mode'}
+                    >
+                      {zenMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                    </button>
+                  </>
+                )}
 
                 <div className="toolbar-divider" />
 
@@ -447,13 +454,15 @@ export default function App() {
                   >
                     <Edit3 className="icon" size={14} />
                   </button>
-                  <button
-                    className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
-                    onClick={() => setViewMode('split')}
-                    title="Split view"
-                  >
-                    <Columns className="icon" size={14} />
-                  </button>
+                  {!isMobile && (
+                    <button
+                      className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
+                      onClick={() => setViewMode('split')}
+                      title="Split view"
+                    >
+                      <Columns className="icon" size={14} />
+                    </button>
+                  )}
                   <button
                     className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
                     onClick={() => setViewMode('preview')}
