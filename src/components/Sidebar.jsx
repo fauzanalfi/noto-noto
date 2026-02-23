@@ -2,11 +2,12 @@ import { useState, useRef } from 'react';
 import {
   BookOpen, Compass, Rocket, Archive, FileText,
   Pin, Trash2, Plus, ChevronDown, ChevronRight,
-  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput
+  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox
 } from 'lucide-react';
 import { DEFAULT_PARA_CATEGORIES } from '../utils';
 
 const ICON_MAP = {
+  inbox: Inbox,
   rocket: Rocket,
   compass: Compass,
   'book-open': BookOpen,

@@ -17,7 +17,7 @@
 
 ## ✨ Features
 
-- **PARA Method** — Organise notes into Projects, Areas, Resources & Archive
+- **PARA Method + Inbox** — Organise notes into Inbox (holding area), Projects, Areas, Resources & Archive
 - **Markdown Editor** — Full toolbar with Bold, Italic, Headings, Lists, Code, Links, and more
 - **Live Split Preview** — Side-by-side editing and rendered preview
 - **Notebooks & Tags** — Flexible hierarchy with coloured notebooks and free-form tagging

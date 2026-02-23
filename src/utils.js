@@ -63,6 +63,7 @@ export function debounce(fn, delay) {
 
 // Default PARA notebooks
 export const DEFAULT_PARA_CATEGORIES = [
+  { id: "inbox", name: "Inbox", color: "#6a9eef", icon: "inbox" },
   { id: "projects", name: "Projects", color: "#ef6a6a", icon: "rocket" },
   { id: "areas", name: "Areas", color: "#efb86a", icon: "compass" },
   { id: "resources", name: "Resources", color: "#6aef8a", icon: "book-open" },
@@ -78,10 +79,13 @@ Noto is your **Second Brain** — a beautiful note-taking app organized using th
 
 PARA stands for:
 
+- **Inbox** — Temporary holding area for new notes before categorization
 - **Projects** — Short-term efforts with a clear goal and deadline
 - **Areas** — Long-term responsibilities you manage over time
 - **Resources** — Topics and interests you want to reference later
 - **Archive** — Inactive items from the other three categories
+
+> **Tip:** Start new notes in Inbox, then move them to the appropriate category once you've clarified their purpose.
 
 ## ✍️ Markdown Support
 
