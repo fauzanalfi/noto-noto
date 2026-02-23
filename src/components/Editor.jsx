@@ -2,7 +2,7 @@ import { useRef, useCallback } from 'react';
 import { countWords } from '../utils';
 import {
   Bold, Italic, Strikethrough, Heading1, Heading2, Heading3,
-  List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus
+  List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus, Table
 } from 'lucide-react';
 
 export default function Editor({ note, onUpdateNote }) {
@@ -39,6 +39,26 @@ export default function Editor({ note, onUpdateNote }) {
     },
     [note, onUpdateNote]
   );
+
+  const insertTable = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const tableTemplate = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
+
+    const newValue =
+      textarea.value.substring(0, start) +
+      tableTemplate +
+      textarea.value.substring(start);
+
+    onUpdateNote(note.id, { content: newValue });
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + tableTemplate.length, start + tableTemplate.length);
+    }, 0);
+  }, [note, onUpdateNote]);
 
   const handleKeyDown = (e) => {
     // Tab key for indentation
@@ -105,6 +125,7 @@ export default function Editor({ note, onUpdateNote }) {
       { icon: Quote, action: () => insertMarkdown('> ', '', 'quote'), title: 'Blockquote' },
       { icon: Link, action: () => insertMarkdown('[', '](url)', 'link text'), title: 'Link' },
       { icon: Image, action: () => insertMarkdown('![', '](url)', 'alt text'), title: 'Image' },
+      { icon: Table, action: insertTable, title: 'Table' },
       { icon: Minus, action: () => insertMarkdown('\n---\n', '', ''), title: 'Horizontal Rule' },
     ]},
   ];

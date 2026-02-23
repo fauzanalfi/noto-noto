@@ -114,6 +114,15 @@ function greet(name) {
 ### Blockquotes
 > "Your mind is for having ideas, not holding them." — David Allen
 
+### Tables
+Create tables with the Table button in the toolbar:
+
+| Feature      | Status | Priority |
+|--------------|--------|----------|
+| Markdown     | ✅     | High     |
+| Live Preview | ✅     | High     |
+| Dark Mode    | ✅     | Medium   |
+
 ---
 
 *Start by creating a new notebook or note using the sidebar. Happy note-taking!* 🚀
