@@ -660,7 +660,8 @@ body {
   min-height: var(--toolbar-height);
   gap: var(--space-xs);
   flex-wrap: nowrap;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
 }
 
