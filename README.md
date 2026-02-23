@@ -123,6 +123,7 @@ noto-noto/
 │   ├── components/     # UI components (Editor, Sidebar, NotesList, …)
 │   ├── hooks/          # Custom React hooks (useNotes, useAuth, …)
 │   ├── assets/         # Images and SVGs
+│   ├── test/           # Test setup files
 │   ├── App.jsx         # Root layout and state
 │   ├── firebase.js     # Firebase initialisation
 │   ├── index.css       # Global design system & styles
@@ -131,6 +132,23 @@ noto-noto/
 ├── vite.config.js
 └── vercel.json
 ```
+
+## 🧪 Testing
+
+Tests are written with Vitest and React Testing Library.
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once (CI mode)
+npm run test:run
+
+# Open Vitest UI
+npm run test:ui
+```
+
+Coverage includes utility functions (`utils.js`) and custom hooks (`useDebounce`).
 
 ## 🤝 Contributing
 

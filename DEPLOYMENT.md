@@ -363,16 +363,39 @@ sudo certbot --nginx -d your-domain.com
 
 ## 10. Environment Variables
 
-Noto currently uses **no environment variables**. All data is stored in the browser's `localStorage`. No backend, no API keys, no database.
+Noto requires Firebase client configuration at build/runtime.
 
-If you add API integrations later, use Vite's env system:
+Create `.env` (local) and configure these keys:
 
-```bash
-# .env.local (never commit this)
-VITE_API_URL=https://api.example.com
+```dotenv
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 ```
 
-Access in code as `import.meta.env.VITE_API_URL`.
+### Hosting platforms (Vercel/Netlify/Cloudflare)
+
+Set the same variables in your hosting dashboard environment settings before deploying.
+
+### Important security note
+
+Firebase config values are public client config (not server secrets), but Firestore access must be protected by security rules.
+
+Apply rules so users can only access their own data:
+
+```firebase
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
 
 ---
 

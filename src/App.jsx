@@ -8,6 +8,7 @@ import { useNotes } from './hooks/useNotes';
 import { useNotebooks } from './hooks/useNotebooks';
 import { useTheme } from './hooks/useTheme';
 import { useAuth } from './hooks/useAuth';
+import { useDebounce } from './hooks/useDebounce';
 import Sidebar from './components/Sidebar';
 import NotesList from './components/NotesList';
 import Editor from './components/Editor';
@@ -23,9 +24,17 @@ export default function App() {
   const {
     notes, allTags, createNote, updateNote, deleteNote, restoreNote,
     permanentlyDeleteNote, togglePin, moveToNotebook, addTag, removeTag,
-    getFilteredNotes, saving, emptyTrash, duplicateNote,
+    getFilteredNotes, saving, emptyTrash, duplicateNote, error: notesError, clearError: clearNotesError,
   } = useNotes(user?.uid);
-  const { notebooks, createNotebook, renameNotebook, deleteNotebook, moveNotebookCategory } = useNotebooks(user?.uid);
+  const {
+    notebooks,
+    createNotebook,
+    renameNotebook,
+    deleteNotebook,
+    moveNotebookCategory,
+    error: notebooksError,
+    clearError: clearNotebooksError,
+  } = useNotebooks(user?.uid);
   const { theme, setTheme } = useTheme();
 
   // UI state
@@ -49,15 +58,18 @@ export default function App() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [saveStatus, setSaveStatus] = useState(null);
 
+  // Debounce search query to reduce filtering overhead for large note sets
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   // Filtered notes
   const filteredNotes = useMemo(() => {
-    const filters = { search: searchQuery };
+    const filters = { search: debouncedSearchQuery };
     if (activeView === 'trash') filters.trashed = true;
     else if (activeView === 'pinned') filters.pinned = true;
     else if (activeView === 'notebook') filters.notebookId = activeNotebookId;
     else if (activeView === 'tag') filters.tag = activeTag;
     return getFilteredNotes(filters);
-  }, [activeView, activeNotebookId, activeTag, searchQuery, getFilteredNotes]);
+  }, [activeView, activeNotebookId, activeTag, debouncedSearchQuery, getFilteredNotes]);
 
   // Active note
   const activeNote = useMemo(
@@ -82,9 +94,12 @@ export default function App() {
     return counts;
   }, [notes]);
 
-  const totalNotes = notes.filter((n) => !n.trashed).length;
-  const pinnedCount = notes.filter((n) => !n.trashed && n.pinned).length;
-  const trashedCount = notes.filter((n) => n.trashed).length;
+  // Memoize count calculations to avoid recalculating on every render
+  const { totalNotes, pinnedCount, trashedCount } = useMemo(() => ({
+    totalNotes: notes.filter((n) => !n.trashed).length,
+    pinnedCount: notes.filter((n) => !n.trashed && n.pinned).length,
+    trashedCount: notes.filter((n) => n.trashed).length,
+  }), [notes]);
 
   // List panel title
   const listTitle = useMemo(() => {
@@ -106,6 +121,7 @@ export default function App() {
         ? activeNotebookId
         : 'resources';
     const note = createNote(notebookId);
+    if (!note) return;
     setActiveNoteId(note.id);
     setShowEditor(true);
   }, [activeView, activeNotebookId, createNote]);
@@ -167,12 +183,14 @@ export default function App() {
     if (isFirstSaveRender.current) { isFirstSaveRender.current = false; return; }
     if (saving) {
       setSaveStatus('saving');
+    } else if (notesError) {
+      setSaveStatus('error');
     } else {
       setSaveStatus('saved');
       const t = setTimeout(() => setSaveStatus(null), 2000);
       return () => clearTimeout(t);
     }
-  }, [saving]);
+  }, [saving, notesError]);
 
   // Get notebook name for active note
   const activeNoteNotebook = activeNote
@@ -257,6 +275,37 @@ export default function App() {
         </div>
 
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {(notesError || notebooksError) && (
+            <div style={{
+              position: 'absolute',
+              top: 8,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 2000,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+              borderRadius: '10px',
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              boxShadow: 'var(--shadow-sm)',
+            }}>
+              <span style={{ fontSize: 'var(--font-size-xs)' }}>{notesError || notebooksError}</span>
+              <button
+                className="toolbar-btn"
+                onClick={() => {
+                  clearNotesError();
+                  clearNotebooksError();
+                }}
+                title="Dismiss"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
           {/* Notes List */}
           <div className={`${showEditor ? 'notes-list-panel hidden' : ''}`} 
                style={showEditor ? { display: undefined } : {}}>
@@ -350,8 +399,9 @@ export default function App() {
                   className={`toolbar-btn ${activeNote.pinned ? 'active' : ''}`}
                   onClick={() => togglePin(activeNote.id)}
                   title={activeNote.pinned ? 'Unpin' : 'Pin'}
+                  aria-label={activeNote.pinned ? 'Unpin note' : 'Pin note'}
                 >
-                  <Pin size={16} />
+                  <Pin size={16} aria-hidden="true" />
                 </button>
 
                 {/* Trash / Restore */}
@@ -361,8 +411,9 @@ export default function App() {
                       className="toolbar-btn"
                       onClick={() => restoreNote(activeNote.id)}
                       title="Restore"
+                      aria-label="Restore note from trash"
                     >
-                      <RotateCcw size={16} />
+                      <RotateCcw size={16} aria-hidden="true" />
                     </button>
                     <button
                       className="toolbar-btn"
@@ -372,9 +423,10 @@ export default function App() {
                         setShowEditor(false);
                       }}
                       title="Delete permanently"
+                      aria-label="Delete note permanently"
                       style={{ color: '#ef4444' }}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} aria-hidden="true" />
                     </button>
                   </>
                 ) : (
@@ -386,15 +438,16 @@ export default function App() {
                       setShowEditor(false);
                     }}
                     title="Move to trash"
+                    aria-label="Move note to trash"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} aria-hidden="true" />
                   </button>
                 )}
 
                 {/* Save indicator */}
                 {saveStatus && (
                   <span className="save-indicator">
-                    {saveStatus === 'saving' ? 'Saving…' : 'Saved ✓'}
+                    {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'error' ? 'Save failed' : 'Saved ✓'}
                   </span>
                 )}
 
@@ -406,8 +459,9 @@ export default function App() {
                     if (copy) setActiveNoteId(copy.id);
                   }}
                   title="Duplicate note"
+                  aria-label="Duplicate note"
                 >
-                  <Copy size={16} />
+                  <Copy size={16} aria-hidden="true" />
                 </button>
 
                 {/* Export */}
@@ -423,8 +477,11 @@ export default function App() {
                       setShowExportMenu((v) => !v);
                     }}
                     title="Export"
+                    aria-label="Export note"
+                    aria-expanded={showExportMenu}
+                    aria-haspopup="menu"
                   >
-                    <Download size={16} />
+                    <Download size={16} aria-hidden="true" />
                   </button>
                   {showExportMenu && (
                     <>

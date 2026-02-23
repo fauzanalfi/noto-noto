@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
@@ -50,7 +51,9 @@ export default function Preview({ content }) {
   const html = useMemo(() => {
     if (!content) return '<p style="color: var(--text-tertiary); font-style: italic;">Nothing to preview yet...</p>';
     try {
-      return marked.parse(content);
+      return DOMPurify.sanitize(marked.parse(content), {
+        USE_PROFILES: { html: true },
+      });
     } catch (e) {
       return '<p>Error rendering preview</p>';
     }

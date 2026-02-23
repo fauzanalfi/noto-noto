@@ -112,10 +112,10 @@ export default function Editor({ note, onUpdateNote }) {
   return (
     <div className="markdown-editor-wrap">
       {/* Formatting Toolbar */}
-      <div className="editor-toolbar" style={{ borderBottom: 'none', paddingLeft: 'var(--space-xl)' }}>
+      <div className="editor-toolbar" style={{ borderBottom: 'none', paddingLeft: 'var(--space-xl)' }} role="toolbar" aria-label="Markdown formatting">
         {toolbarButtons.map((group, gi) => (
           <div key={group.group} style={{ display: 'contents' }}>
-            {gi > 0 && <div className="toolbar-divider" />}
+            {gi > 0 && <div className="toolbar-divider" aria-hidden="true" />}
             <div className="toolbar-group">
               {group.items.map(({ icon: Icon, action, title }) => (
                 <button
@@ -123,8 +123,9 @@ export default function Editor({ note, onUpdateNote }) {
                   className="toolbar-btn"
                   onClick={action}
                   title={title}
+                  aria-label={title}
                 >
-                  <Icon className="icon" size={16} />
+                  <Icon className="icon" size={16} aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -141,6 +142,7 @@ export default function Editor({ note, onUpdateNote }) {
         onKeyDown={handleKeyDown}
         placeholder="Start writing in Markdown..."
         spellCheck={false}
+        aria-label="Note content editor"
       />
 
       {/* Word count bar */}

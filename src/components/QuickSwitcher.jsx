@@ -49,21 +49,22 @@ export default function QuickSwitcher({ notes, onSelect, onClose }) {
 
   return (
     <>
-      <div className="quick-switcher-backdrop" onClick={onClose} />
-      <div className="quick-switcher" onKeyDown={handleKeyDown}>
+      <div className="quick-switcher-backdrop" onClick={onClose} aria-hidden="true" />
+      <div className="quick-switcher" onKeyDown={handleKeyDown} role="dialog" aria-label="Quick note switcher">
         <div className="quick-switcher-input-wrap">
-          <Search size={16} />
+          <Search size={16} aria-hidden="true" />
           <input
             ref={inputRef}
             className="quick-switcher-input"
             value={query}
             onChange={handleQueryChange}
             placeholder="Jump to note..."
+            aria-label="Search notes"
           />
         </div>
-        <div className="quick-switcher-list">
+        <div className="quick-switcher-list" role="listbox">
           {filtered.length === 0 ? (
-            <div className="quick-switcher-empty">No notes found</div>
+            <div className="quick-switcher-empty" role="status">No notes found</div>
           ) : (
             filtered.map((note, i) => (
               <button
@@ -71,6 +72,8 @@ export default function QuickSwitcher({ notes, onSelect, onClose }) {
                 className={`quick-switcher-item ${i === selectedIdx ? 'active' : ''}`}
                 onClick={() => onSelect(note.id)}
                 onMouseEnter={() => setSelectedIdx(i)}
+                role="option"
+                aria-selected={i === selectedIdx}
               >
                 <span className="quick-switcher-title">{note.title || 'Untitled'}</span>
                 <span className="quick-switcher-date">{formatDate(note.updatedAt)}</span>
@@ -78,7 +81,7 @@ export default function QuickSwitcher({ notes, onSelect, onClose }) {
             ))
           )}
         </div>
-        <div className="quick-switcher-hint">
+        <div className="quick-switcher-hint" aria-hidden="true">
           <span>↑↓ navigate</span>
           <span>↵ open</span>
           <span>Esc close</span>

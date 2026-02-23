@@ -45,6 +45,9 @@ export default function NotesList({
               style={{ minWidth: 'auto', height: '26px', padding: '2px 6px' }}
               onClick={() => setShowSortMenu((v) => !v)}
               title={`Sort: ${SORT_OPTIONS.find((o) => o.id === sortBy)?.label}`}
+              aria-label={`Sort by ${SORT_OPTIONS.find((o) => o.id === sortBy)?.label}`}
+              aria-expanded={showSortMenu}
+              aria-haspopup="menu"
             >
               <ArrowUpDown size={12} />
             </button>
@@ -88,12 +91,13 @@ export default function NotesList({
 
       {/* Search */}
       <div className="search-box">
-        <Search className="icon" size={16} />
+        <Search className="icon" size={16} aria-hidden="true" />
         <input
           type="text"
           placeholder="Search notes..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
+          aria-label="Search notes"
         />
       </div>
 
@@ -112,6 +116,15 @@ export default function NotesList({
               key={note.id}
               className={`note-card ${activeNoteId === note.id ? 'active' : ''}`}
               onClick={() => onSelectNote(note.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectNote(note.id);
+                }
+              }}
+              aria-label={`Note: ${note.title || 'Untitled Note'}`}
             >
               <div className="note-card-title">
                 {note.title || 'Untitled Note'}
@@ -139,7 +152,7 @@ export default function NotesList({
       </div>
 
       {/* FAB: New Note */}
-      <button className="new-note-btn" onClick={onCreateNote} title="New Note">
+      <button className="new-note-btn" onClick={onCreateNote} title="New Note" aria-label="Create new note">
         <Plus size={22} />
       </button>
     </div>

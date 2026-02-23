@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
-  collection, getDocs, doc, setDoc, updateDoc, deleteDoc,
+  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { generateId, DEFAULT_PARA_CATEGORIES } from '../utils';
@@ -22,24 +22,49 @@ function notebookRef(userId, nbId) { return doc(db, 'users', userId, 'notebooks'
 export function useNotebooks(userId) {
   const [notebooks, setNotebooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) { setNotebooks([]); setLoading(false); return; }
+    if (!userId) {
+      setNotebooks([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     setLoading(true);
-    getDocs(notebooksRef(userId))
-      .then((snap) => {
+    setError(null);
+
+    let hasSeededDefaults = false;
+    const unsubscribe = onSnapshot(
+      notebooksRef(userId),
+      (snap) => {
         if (snap.empty) {
-          const defaults = defaultNotebooks();
-          defaults.forEach((nb) =>
-            setDoc(notebookRef(userId, nb.id), nb).catch(console.error)
-          );
-          setNotebooks(defaults);
+          if (!hasSeededDefaults) {
+            hasSeededDefaults = true;
+            const defaults = defaultNotebooks();
+            setNotebooks(defaults);
+            Promise.all(defaults.map((nb) => setDoc(notebookRef(userId, nb.id), nb))).catch((writeError) => {
+              setError('Failed to create default notebooks.');
+              console.error(writeError);
+            });
+          } else {
+            setNotebooks([]);
+          }
         } else {
+          hasSeededDefaults = true;
           setNotebooks(snap.docs.map((d) => d.data()));
         }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+        setLoading(false);
+      },
+      (snapshotError) => {
+        setLoading(false);
+        setError('Failed to sync notebooks. Please refresh and try again.');
+        console.error(snapshotError);
+      }
+    );
+
+    return () => unsubscribe();
   }, [userId]);
 
   const createNotebook = useCallback((name, paraCategory = 'resources') => {
@@ -54,23 +79,44 @@ export function useNotebooks(userId) {
       createdAt: new Date().toISOString(),
     };
     setNotebooks((prev) => [...prev, nb]);
-    setDoc(notebookRef(userId, nb.id), nb).catch(console.error);
+    setError(null);
+    setDoc(notebookRef(userId, nb.id), nb).catch((writeError) => {
+      setNotebooks((prev) => prev.filter((item) => item.id !== nb.id));
+      setError('Failed to create notebook.');
+      console.error(writeError);
+    });
     return nb;
   }, [userId]);
 
   const renameNotebook = useCallback((id, name) => {
     if (!userId) return;
+    const previousNotebook = notebooks.find((nb) => nb.id === id);
     setNotebooks((prev) => prev.map((nb) => (nb.id === id ? { ...nb, name } : nb)));
-    updateDoc(notebookRef(userId, id), { name }).catch(console.error);
-  }, [userId]);
+    setError(null);
+    updateDoc(notebookRef(userId, id), { name }).catch((writeError) => {
+      if (previousNotebook) {
+        setNotebooks((prev) => prev.map((nb) => (nb.id === id ? previousNotebook : nb)));
+      }
+      setError('Failed to rename notebook.');
+      console.error(writeError);
+    });
+  }, [userId, notebooks]);
 
   const deleteNotebook = useCallback((id) => {
     const isDefault = DEFAULT_PARA_CATEGORIES.some((c) => c.id === id);
     if (isDefault || !userId) return false;
+    const removedNotebook = notebooks.find((nb) => nb.id === id);
     setNotebooks((prev) => prev.filter((nb) => nb.id !== id));
-    deleteDoc(notebookRef(userId, id)).catch(console.error);
+    setError(null);
+    deleteDoc(notebookRef(userId, id)).catch((writeError) => {
+      if (removedNotebook) {
+        setNotebooks((prev) => [...prev, removedNotebook]);
+      }
+      setError('Failed to delete notebook.');
+      console.error(writeError);
+    });
     return true;
-  }, [userId]);
+  }, [userId, notebooks]);
 
   const moveNotebookCategory = useCallback((id, newParaCategory) => {
     if (!userId) return;
@@ -78,10 +124,18 @@ export function useNotebooks(userId) {
     if (isDefault) return;
     const paraCat = DEFAULT_PARA_CATEGORIES.find((c) => c.id === newParaCategory);
     if (!paraCat) return;
+    const previousNotebook = notebooks.find((nb) => nb.id === id);
     const updates = { paraCategory: newParaCategory, color: paraCat.color, icon: paraCat.icon };
     setNotebooks((prev) => prev.map((nb) => (nb.id === id ? { ...nb, ...updates } : nb)));
-    updateDoc(notebookRef(userId, id), updates).catch(console.error);
-  }, [userId]);
+    setError(null);
+    updateDoc(notebookRef(userId, id), updates).catch((writeError) => {
+      if (previousNotebook) {
+        setNotebooks((prev) => prev.map((nb) => (nb.id === id ? previousNotebook : nb)));
+      }
+      setError('Failed to move notebook category.');
+      console.error(writeError);
+    });
+  }, [userId, notebooks]);
 
   const getNotebooksByCategory = useCallback(
     (paraCategory) => notebooks.filter((nb) => nb.paraCategory === paraCategory),
@@ -91,6 +145,8 @@ export function useNotebooks(userId) {
   return {
     notebooks,
     loading,
+    error,
+    clearError: () => setError(null),
     createNotebook,
     renameNotebook,
     deleteNotebook,
