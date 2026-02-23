@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { countWords } from '../utils';
 import {
   Bold, Italic, Strikethrough, Heading1, Heading2, Heading3,
@@ -7,6 +7,9 @@ import {
 
 export default function Editor({ note, onUpdateNote }) {
   const textareaRef = useRef(null);
+  const [showTableModal, setShowTableModal] = useState(false);
+  const [tableRows, setTableRows] = useState(2);
+  const [tableCols, setTableCols] = useState(3);
 
   const insertMarkdown = useCallback(
     (before, after = '', placeholder = '') => {
@@ -40,12 +43,23 @@ export default function Editor({ note, onUpdateNote }) {
     [note, onUpdateNote]
   );
 
-  const insertTable = useCallback(() => {
+  const insertTable = useCallback((rows, cols) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
-    const tableTemplate = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
+    const safeRows = Math.max(1, Math.min(Number(rows) || 1, 20));
+    const safeCols = Math.max(1, Math.min(Number(cols) || 1, 12));
+    const headerCells = Array.from({ length: safeCols }, (_, i) => `Header ${i + 1}`);
+    const separatorCells = Array.from({ length: safeCols }, () => '---');
+    const bodyRows = Array.from({ length: safeRows }, (_, r) => {
+      const rowCells = Array.from(
+        { length: safeCols },
+        (_, c) => `Cell ${r + 1}-${c + 1}`
+      );
+      return `| ${rowCells.join(' | ')} |`;
+    });
+    const tableTemplate = `\n| ${headerCells.join(' | ')} |\n| ${separatorCells.join(' | ')} |\n${bodyRows.join('\n')}\n`;
 
     const newValue =
       textarea.value.substring(0, start) +
@@ -59,6 +73,20 @@ export default function Editor({ note, onUpdateNote }) {
       textarea.setSelectionRange(start + tableTemplate.length, start + tableTemplate.length);
     }, 0);
   }, [note, onUpdateNote]);
+
+  const handleOpenTableModal = () => {
+    setShowTableModal(true);
+  };
+
+  const handleCloseTableModal = () => {
+    setShowTableModal(false);
+  };
+
+  const handleCreateTable = (e) => {
+    e.preventDefault();
+    insertTable(tableRows, tableCols);
+    setShowTableModal(false);
+  };
 
   const handleKeyDown = (e) => {
     // Tab key for indentation
@@ -125,7 +153,7 @@ export default function Editor({ note, onUpdateNote }) {
       { icon: Quote, action: () => insertMarkdown('> ', '', 'quote'), title: 'Blockquote' },
       { icon: Link, action: () => insertMarkdown('[', '](url)', 'link text'), title: 'Link' },
       { icon: Image, action: () => insertMarkdown('![', '](url)', 'alt text'), title: 'Image' },
-      { icon: Table, action: insertTable, title: 'Table' },
+      { icon: Table, action: handleOpenTableModal, title: 'Table' },
       { icon: Minus, action: () => insertMarkdown('\n---\n', '', ''), title: 'Horizontal Rule' },
     ]},
   ];
@@ -153,6 +181,44 @@ export default function Editor({ note, onUpdateNote }) {
           </div>
         ))}
       </div>
+
+      {showTableModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Insert table" onClick={handleCloseTableModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Insert Table</h3>
+            <form onSubmit={handleCreateTable}>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                <label style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', marginBottom: '6px', color: 'var(--text-secondary)' }}>Rows</div>
+                  <input
+                    className="modal-input"
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={tableRows}
+                    onChange={(e) => setTableRows(Number(e.target.value))}
+                  />
+                </label>
+                <label style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', marginBottom: '6px', color: 'var(--text-secondary)' }}>Columns</div>
+                  <input
+                    className="modal-input"
+                    type="number"
+                    min="1"
+                    max="12"
+                    value={tableCols}
+                    onChange={(e) => setTableCols(Number(e.target.value))}
+                  />
+                </label>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn" onClick={handleCloseTableModal}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Insert</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Textarea */}
       <textarea

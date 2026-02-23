@@ -659,9 +659,9 @@ body {
   border-bottom: 1px solid var(--border-subtle);
   min-height: var(--toolbar-height);
   gap: var(--space-xs);
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
+  flex-wrap: wrap;
+  row-gap: 4px;
+  overflow: visible;
   position: relative;
 }
 
