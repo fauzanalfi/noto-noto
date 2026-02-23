@@ -267,7 +267,6 @@ export default function Sidebar({
                   onClick={() => handleNavClick('tag', null, tag)}
                 >
                   #{tag}
-                  {noteCountByTag?.[tag] ? <span className="count">{noteCountByTag[tag]}</span> : null}
                 </button>
               ))}
             </div>
