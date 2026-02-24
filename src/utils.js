@@ -170,3 +170,59 @@ export function exportAllNotesAsJSON(notes) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+async function exportNotesAsMarkdownZip(notes, prefix) {
+  const { default: JSZip } = await import('jszip');
+  const zip = new JSZip();
+  const usedNames = new Set();
+
+  const sanitizeFileName = (value) =>
+    (value || 'untitled')
+      .trim()
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase() || 'untitled';
+
+  notes.forEach((note, index) => {
+    const base = sanitizeFileName(note.title || `note-${index + 1}`);
+    let fileName = `${base}.md`;
+    let counter = 2;
+
+    while (usedNames.has(fileName)) {
+      fileName = `${base}-${counter}.md`;
+      counter += 1;
+    }
+
+    usedNames.add(fileName);
+
+    const content = note.title
+      ? `# ${note.title}\n\n${note.content || ''}`
+      : (note.content || '');
+
+    zip.file(fileName, content);
+  });
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${prefix}-${new Date().toISOString().split('T')[0]}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function exportAllNotesAsMarkdownZip(notes) {
+  return exportNotesAsMarkdownZip(notes, 'noto-markdown-backup');
+}
+
+export function exportCurrentListAsMarkdownZip(notes, listName = 'notes') {
+  const safeListName = (listName || 'notes')
+    .replace(/^#/, '')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase() || 'notes';
+
+  return exportNotesAsMarkdownZip(notes, `noto-${safeListName}`);
+}

@@ -16,7 +16,13 @@ import Preview from './components/Preview';
 import EmptyState from './components/EmptyState';
 import QuickSwitcher from './components/QuickSwitcher';
 import LoginScreen from './components/LoginScreen';
-import { formatFullDate, exportNoteAsMarkdown, exportAllNotesAsJSON } from './utils';
+import {
+  formatFullDate,
+  exportNoteAsMarkdown,
+  exportAllNotesAsJSON,
+  exportAllNotesAsMarkdownZip,
+  exportCurrentListAsMarkdownZip,
+} from './utils';
 
 export default function App() {
   // Data hooks
@@ -489,6 +495,21 @@ export default function App() {
                       <div className="context-menu" style={{ position: 'fixed', top: exportMenuPos.top, left: exportMenuPos.left, zIndex: 9999 }}>
                         <button className="context-menu-item" onClick={() => { exportNoteAsMarkdown(activeNote); setShowExportMenu(false); }}>
                           Export as Markdown
+                        </button>
+                        <button className="context-menu-item" onClick={() => { exportAllNotesAsMarkdownZip(notes); setShowExportMenu(false); }}>
+                          Backup all (.md zip)
+                        </button>
+                        <button
+                          className="context-menu-item"
+                          disabled={filteredNotes.length === 0}
+                          style={filteredNotes.length === 0 ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+                          onClick={() => {
+                            if (filteredNotes.length === 0) return;
+                            exportCurrentListAsMarkdownZip(filteredNotes, listTitle);
+                            setShowExportMenu(false);
+                          }}
+                        >
+                          Export current list (.md zip)
                         </button>
                         <button className="context-menu-item" onClick={() => { exportAllNotesAsJSON(notes); setShowExportMenu(false); }}>
                           Backup all (JSON)
