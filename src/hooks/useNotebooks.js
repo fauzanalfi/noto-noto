@@ -4,6 +4,9 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { generateId, DEFAULT_PARA_CATEGORIES } from '../utils';
+import { isDemoMode } from '../runtime';
+
+const demoNotebooksKey = (userId) => `noto-demo-notebooks-${userId}`;
 
 function defaultNotebooks() {
   return DEFAULT_PARA_CATEGORIES.map((cat) => ({
@@ -32,6 +35,29 @@ export function useNotebooks(userId) {
         setError(null);
       }, 0);
       return () => clearTimeout(resetTimer);
+    }
+
+    if (isDemoMode) {
+      const startSyncTimer = setTimeout(() => {
+        setLoading(true);
+        setError(null);
+
+        let existingNotebooks = [];
+        try {
+          existingNotebooks = JSON.parse(localStorage.getItem(demoNotebooksKey(userId)) || '[]');
+        } catch {
+          existingNotebooks = [];
+        }
+
+        if (existingNotebooks.length === 0) {
+          setNotebooks(defaultNotebooks());
+        } else {
+          setNotebooks(existingNotebooks);
+        }
+        setLoading(false);
+      }, 0);
+
+      return () => clearTimeout(startSyncTimer);
     }
 
     const startSyncTimer = setTimeout(() => {
@@ -74,6 +100,15 @@ export function useNotebooks(userId) {
     };
   }, [userId]);
 
+  useEffect(() => {
+    if (!isDemoMode || !userId || loading) return;
+    try {
+      localStorage.setItem(demoNotebooksKey(userId), JSON.stringify(notebooks));
+    } catch {
+      console.error('Failed to save local demo notebooks.');
+    }
+  }, [notebooks, userId, loading]);
+
   const createNotebook = useCallback((name, paraCategory = 'resources') => {
     if (!userId) return null;
     const paraCat = DEFAULT_PARA_CATEGORIES.find((c) => c.id === paraCategory) || DEFAULT_PARA_CATEGORIES[2];
@@ -87,6 +122,9 @@ export function useNotebooks(userId) {
     };
     setNotebooks((prev) => [...prev, nb]);
     setError(null);
+
+    if (isDemoMode) return nb;
+
     setDoc(notebookRef(userId, nb.id), nb).catch((writeError) => {
       setNotebooks((prev) => prev.filter((item) => item.id !== nb.id));
       setError('Failed to create notebook.');
@@ -100,6 +138,9 @@ export function useNotebooks(userId) {
     const previousNotebook = notebooks.find((nb) => nb.id === id);
     setNotebooks((prev) => prev.map((nb) => (nb.id === id ? { ...nb, name } : nb)));
     setError(null);
+
+    if (isDemoMode) return;
+
     updateDoc(notebookRef(userId, id), { name }).catch((writeError) => {
       if (previousNotebook) {
         setNotebooks((prev) => prev.map((nb) => (nb.id === id ? previousNotebook : nb)));
@@ -115,6 +156,9 @@ export function useNotebooks(userId) {
     const removedNotebook = notebooks.find((nb) => nb.id === id);
     setNotebooks((prev) => prev.filter((nb) => nb.id !== id));
     setError(null);
+
+    if (isDemoMode) return true;
+
     deleteDoc(notebookRef(userId, id)).catch((writeError) => {
       if (removedNotebook) {
         setNotebooks((prev) => [...prev, removedNotebook]);
@@ -135,6 +179,9 @@ export function useNotebooks(userId) {
     const updates = { paraCategory: newParaCategory, color: paraCat.color, icon: paraCat.icon };
     setNotebooks((prev) => prev.map((nb) => (nb.id === id ? { ...nb, ...updates } : nb)));
     setError(null);
+
+    if (isDemoMode) return;
+
     updateDoc(notebookRef(userId, id), updates).catch((writeError) => {
       if (previousNotebook) {
         setNotebooks((prev) => prev.map((nb) => (nb.id === id ? previousNotebook : nb)));

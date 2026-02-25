@@ -1,5 +1,9 @@
 import { useCallback } from 'react';
-import { deleteDoc, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  deleteDoc as firebaseDeleteDoc,
+  setDoc as firebaseSetDoc,
+  updateDoc as firebaseUpdateDoc,
+} from 'firebase/firestore';
 
 export function useNoteActions({
   userId,
@@ -16,15 +20,18 @@ export function useNoteActions({
   clearUpdateTimer,
   incrementPendingWrites,
   decrementPendingWrites,
+  setDocFn = firebaseSetDoc,
+  updateDocFn = firebaseUpdateDoc,
+  deleteDocFn = firebaseDeleteDoc,
 }) {
   const seedWelcomeNote = useCallback((welcomeNote) => {
     if (!userId) return;
     setNotes([welcomeNote]);
-    trackWrite(setDoc(noteRef(userId, welcomeNote.id), welcomeNote), {
+    trackWrite(setDocFn(noteRef(userId, welcomeNote.id), welcomeNote), {
       message: 'Failed to create welcome note.',
       onError: () => setNotes([]),
     });
-  }, [userId, setNotes, trackWrite, noteRef]);
+  }, [userId, setNotes, trackWrite, noteRef, setDocFn]);
 
   const createNote = useCallback((notebookId = 'resources') => {
     if (!userId) return null;
@@ -41,12 +48,12 @@ export function useNoteActions({
       trashed: false,
     };
     setNotes((prev) => [note, ...prev]);
-    trackWrite(setDoc(noteRef(userId, note.id), note), {
+    trackWrite(setDocFn(noteRef(userId, note.id), note), {
       message: 'Failed to create note.',
       onError: () => setNotes((prev) => prev.filter((n) => n.id !== note.id)),
     });
     return note;
-  }, [userId, generateId, setNotes, trackWrite, noteRef]);
+  }, [userId, generateId, setNotes, trackWrite, noteRef, setDocFn]);
 
   const updateNote = useCallback((id, updates) => {
     if (!userId) return;
@@ -65,7 +72,7 @@ export function useNoteActions({
     clearUpdateTimer(id);
     setUpdateTimer(id, setTimeout(() => {
       incrementPendingWrites();
-      updateDoc(noteRef(userId, id), updated)
+      updateDocFn(noteRef(userId, id), updated)
         .catch((writeError) => {
           const isLatest = isLatestUpdateToken(id, updateToken);
           if (isLatest && previousNote) {
@@ -92,6 +99,7 @@ export function useNoteActions({
     isLatestUpdateToken,
     decrementPendingWrites,
     noteRef,
+    updateDocFn,
   ]);
 
   const deleteNote = useCallback((id) => {
@@ -99,53 +107,53 @@ export function useNoteActions({
     const updated = { trashed: true, updatedAt: new Date().toISOString() };
     const originalNote = notes.find((n) => n.id === id);
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
+    trackWrite(updateDocFn(noteRef(userId, id), updated), {
       message: 'Failed to move note to trash.',
       onError: () => {
         if (!originalNote) return;
         setNotes((prev) => prev.map((n) => (n.id === id ? originalNote : n)));
       },
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, updateDocFn]);
 
   const restoreNote = useCallback((id) => {
     if (!userId) return;
     const updated = { trashed: false, updatedAt: new Date().toISOString() };
     const originalNote = notes.find((n) => n.id === id);
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
+    trackWrite(updateDocFn(noteRef(userId, id), updated), {
       message: 'Failed to restore note.',
       onError: () => {
         if (!originalNote) return;
         setNotes((prev) => prev.map((n) => (n.id === id ? originalNote : n)));
       },
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, updateDocFn]);
 
   const permanentlyDeleteNote = useCallback((id) => {
     if (!userId) return;
     const removedNote = notes.find((n) => n.id === id);
     setNotes((prev) => prev.filter((n) => n.id !== id));
-    trackWrite(deleteDoc(noteRef(userId, id)), {
+    trackWrite(deleteDocFn(noteRef(userId, id)), {
       message: 'Failed to permanently delete note.',
       onError: () => {
         if (!removedNote) return;
         setNotes((prev) => [removedNote, ...prev]);
       },
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, deleteDocFn]);
 
   const emptyTrash = useCallback(() => {
     if (!userId) return;
     const trashed = notes.filter((n) => n.trashed);
     setNotes((prev) => prev.filter((n) => !n.trashed));
-    Promise.all(trashed.map((n) => deleteDoc(noteRef(userId, n.id))))
+    Promise.all(trashed.map((n) => deleteDocFn(noteRef(userId, n.id))))
       .catch((writeError) => {
         setNotes((prev) => [...trashed, ...prev]);
         setError('Failed to empty trash. Please try again.');
         console.error(writeError);
       });
-  }, [userId, notes, setNotes, setError, noteRef]);
+  }, [userId, notes, setNotes, setError, noteRef, deleteDocFn]);
 
   const duplicateNote = useCallback((id) => {
     if (!userId) return null;
@@ -161,12 +169,12 @@ export function useNoteActions({
       pinned: false,
     };
     setNotes((prev) => [copy, ...prev]);
-    trackWrite(setDoc(noteRef(userId, copy.id), copy), {
+    trackWrite(setDocFn(noteRef(userId, copy.id), copy), {
       message: 'Failed to duplicate note.',
       onError: () => setNotes((prev) => prev.filter((n) => n.id !== copy.id)),
     });
     return copy;
-  }, [userId, notes, generateId, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, generateId, setNotes, trackWrite, noteRef, setDocFn]);
 
   const togglePin = useCallback((id) => {
     if (!userId) return;
@@ -174,25 +182,25 @@ export function useNoteActions({
     if (!note) return;
     const updated = { pinned: !note.pinned, updatedAt: new Date().toISOString() };
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
+    trackWrite(updateDocFn(noteRef(userId, id), updated), {
       message: 'Failed to update pin state.',
       onError: () => setNotes((prev) => prev.map((n) => (n.id === id ? note : n))),
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, updateDocFn]);
 
   const moveToNotebook = useCallback((id, notebookId) => {
     if (!userId) return;
     const previousNote = notes.find((n) => n.id === id);
     const updated = { notebookId, updatedAt: new Date().toISOString() };
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
+    trackWrite(updateDocFn(noteRef(userId, id), updated), {
       message: 'Failed to move note to notebook.',
       onError: () => {
         if (!previousNote) return;
         setNotes((prev) => prev.map((n) => (n.id === id ? previousNote : n)));
       },
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, updateDocFn]);
 
   const addTag = useCallback((id, tag) => {
     if (!userId) return;
@@ -201,11 +209,11 @@ export function useNoteActions({
     const tags = [...note.tags, tag];
     const updated = { tags, updatedAt: new Date().toISOString() };
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, tags } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
+    trackWrite(updateDocFn(noteRef(userId, id), updated), {
       message: 'Failed to add tag.',
       onError: () => setNotes((prev) => prev.map((n) => (n.id === id ? note : n))),
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, updateDocFn]);
 
   const removeTag = useCallback((id, tag) => {
     if (!userId) return;
@@ -214,11 +222,11 @@ export function useNoteActions({
     const tags = note.tags.filter((t) => t !== tag);
     const updated = { tags, updatedAt: new Date().toISOString() };
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, tags } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
+    trackWrite(updateDocFn(noteRef(userId, id), updated), {
       message: 'Failed to remove tag.',
       onError: () => setNotes((prev) => prev.map((n) => (n.id === id ? note : n))),
     });
-  }, [userId, notes, setNotes, trackWrite, noteRef]);
+  }, [userId, notes, setNotes, trackWrite, noteRef, updateDocFn]);
 
   return {
     seedWelcomeNote,

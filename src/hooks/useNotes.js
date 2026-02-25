@@ -5,6 +5,9 @@ import {
 import { db } from '../firebase';
 import { generateId, WELCOME_NOTE_CONTENT } from '../utils';
 import { useNoteActions } from './useNoteActions';
+import { isDemoMode } from '../runtime';
+
+const demoNotesKey = (userId) => `noto-demo-notes-${userId}`;
 
 function makeWelcomeNote() {
   const now = new Date().toISOString();
@@ -108,6 +111,9 @@ export function useNotes(userId) {
     clearUpdateTimer,
     incrementPendingWrites,
     decrementPendingWrites,
+    setDocFn: isDemoMode ? () => Promise.resolve() : undefined,
+    updateDocFn: isDemoMode ? () => Promise.resolve() : undefined,
+    deleteDocFn: isDemoMode ? () => Promise.resolve() : undefined,
   });
 
   useEffect(() => {
@@ -124,6 +130,34 @@ export function useNotes(userId) {
         hasSeededWelcomeRef.current = false;
       }, 0);
       return () => clearTimeout(resetTimer);
+    }
+
+    if (isDemoMode) {
+      const startSyncTimer = setTimeout(() => {
+        setLoading(true);
+        setError(null);
+
+        let existingNotes = [];
+        try {
+          existingNotes = JSON.parse(localStorage.getItem(demoNotesKey(userId)) || '[]');
+        } catch {
+          existingNotes = [];
+        }
+
+        if (existingNotes.length === 0) {
+          const welcome = makeWelcomeNote();
+          setNotes([welcome]);
+        } else {
+          setNotes(existingNotes);
+        }
+        setLoading(false);
+      }, 0);
+
+      return () => {
+        clearTimeout(startSyncTimer);
+        Object.values(updateTimers.current).forEach((timerId) => clearTimeout(timerId));
+        updateTimers.current = {};
+      };
     }
 
     const startSyncTimer = setTimeout(() => {
@@ -163,6 +197,15 @@ export function useNotes(userId) {
       updateTimers.current = {};
     };
   }, [userId, seedWelcomeNote]);
+
+  useEffect(() => {
+    if (!isDemoMode || !userId || loading) return;
+    try {
+      localStorage.setItem(demoNotesKey(userId), JSON.stringify(notes));
+    } catch {
+      console.error('Failed to save local demo notes.');
+    }
+  }, [notes, userId, loading]);
 
   // Get all unique tags
   const allTags = [...new Set(notes.filter((n) => !n.trashed).flatMap((n) => n.tags))].sort();
