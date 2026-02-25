@@ -6,9 +6,9 @@
   <p><strong>A fast, Markdown-first note-taking app built around the PARA method.</strong></p>
 
   [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square&logo=vercel)](https://noto-noto.vercel.app)
-  [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)](https://react.dev)
+  [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev)
   [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
-  [![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
+  [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
   [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 </div>
@@ -38,7 +38,7 @@
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite 6 |
+| Frontend | React 19, Vite 7 |
 | Styling | Plain CSS (custom design system) |
 | Icons | Lucide React |
 | Auth | Firebase Authentication (Google) |
@@ -99,6 +99,8 @@ npm run preview
 vercel --prod
 ```
 
+For GitHub Pages demo deployment, follow the GitHub Actions steps in [DEPLOYMENT.md](DEPLOYMENT.md#6-deploy-to-github-pages).
+
 ## 🔒 Firestore Security Rules
 
 Ensure notes are private per user. Apply these rules in the Firebase Console:
@@ -133,6 +135,12 @@ noto-noto/
 └── vercel.json
 ```
 
+## 📚 Documentation
+
+- [App Documentation](docs/APP_DOCUMENTATION.md) — architecture, data model, hooks, and operational notes
+- [Deployment Guide](DEPLOYMENT.md) — hosting and deployment options
+- [Changelog](CHANGELOG.md) — recent project updates
+
 ## 🧪 Testing
 
 Tests are written with Vitest and React Testing Library.
@@ -148,7 +156,7 @@ npm run test:run
 npm run test:ui
 ```
 
-Coverage includes utility functions (`utils.js`) and custom hooks (`useDebounce`).
+Coverage includes utility functions (`utils.js`) and custom hooks (`useDebounce`, `useNoteActions`).
 
 ## 🤝 Contributing
 

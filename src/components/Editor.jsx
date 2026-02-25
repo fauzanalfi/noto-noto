@@ -5,6 +5,44 @@ import {
   List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus, Table
 } from 'lucide-react';
 
+const TOOLBAR_GROUPS = [
+  {
+    group: 'format',
+    items: [
+      { key: 'bold', icon: Bold, title: 'Bold (Ctrl+B)' },
+      { key: 'italic', icon: Italic, title: 'Italic (Ctrl+I)' },
+      { key: 'strikethrough', icon: Strikethrough, title: 'Strikethrough' },
+    ],
+  },
+  {
+    group: 'heading',
+    items: [
+      { key: 'h1', icon: Heading1, title: 'Heading 1' },
+      { key: 'h2', icon: Heading2, title: 'Heading 2' },
+      { key: 'h3', icon: Heading3, title: 'Heading 3' },
+    ],
+  },
+  {
+    group: 'list',
+    items: [
+      { key: 'list-bullet', icon: List, title: 'Bullet List' },
+      { key: 'list-numbered', icon: ListOrdered, title: 'Numbered List' },
+      { key: 'list-task', icon: CheckSquare, title: 'Task List' },
+    ],
+  },
+  {
+    group: 'insert',
+    items: [
+      { key: 'code-inline', icon: Code, title: 'Inline Code' },
+      { key: 'quote', icon: Quote, title: 'Blockquote' },
+      { key: 'link', icon: Link, title: 'Link' },
+      { key: 'image', icon: Image, title: 'Image' },
+      { key: 'table', icon: Table, title: 'Table' },
+      { key: 'hr', icon: Minus, title: 'Horizontal Rule' },
+    ],
+  },
+];
+
 export default function Editor({ note, onUpdateNote }) {
   const textareaRef = useRef(null);
   const [showTableModal, setShowTableModal] = useState(false);
@@ -30,10 +68,8 @@ export default function Editor({ note, onUpdateNote }) {
 
       onUpdateNote(note.id, { content: newValue });
 
-      // Restore cursor position
       setTimeout(() => {
         textarea.focus();
-        const cursorPos = start + before.length + text.length;
         textarea.setSelectionRange(
           start + before.length,
           start + before.length + text.length
@@ -130,53 +166,82 @@ export default function Editor({ note, onUpdateNote }) {
     }
   };
 
-  if (!note) return null;
+  const handleToolbarAction = useCallback((actionKey) => {
+    switch (actionKey) {
+      case 'bold':
+        insertMarkdown('**', '**', 'bold');
+        break;
+      case 'italic':
+        insertMarkdown('*', '*', 'italic');
+        break;
+      case 'strikethrough':
+        insertMarkdown('~~', '~~', 'strikethrough');
+        break;
+      case 'h1':
+        insertMarkdown('# ', '', 'Heading 1');
+        break;
+      case 'h2':
+        insertMarkdown('## ', '', 'Heading 2');
+        break;
+      case 'h3':
+        insertMarkdown('### ', '', 'Heading 3');
+        break;
+      case 'list-bullet':
+        insertMarkdown('- ', '', 'list item');
+        break;
+      case 'list-numbered':
+        insertMarkdown('1. ', '', 'list item');
+        break;
+      case 'list-task':
+        insertMarkdown('- [ ] ', '', 'task');
+        break;
+      case 'code-inline':
+        insertMarkdown('`', '`', 'code');
+        break;
+      case 'quote':
+        insertMarkdown('> ', '', 'quote');
+        break;
+      case 'link':
+        insertMarkdown('[', '](url)', 'link text');
+        break;
+      case 'image':
+        insertMarkdown('![', '](url)', 'alt text');
+        break;
+      case 'table':
+        handleOpenTableModal();
+        break;
+      case 'hr':
+        insertMarkdown('\n---\n', '', '');
+        break;
+      default:
+        break;
+    }
+  }, [insertMarkdown]);
 
-  const toolbarButtons = [
-    { group: 'format', items: [
-      { icon: Bold, action: () => insertMarkdown('**', '**', 'bold'), title: 'Bold (Ctrl+B)' },
-      { icon: Italic, action: () => insertMarkdown('*', '*', 'italic'), title: 'Italic (Ctrl+I)' },
-      { icon: Strikethrough, action: () => insertMarkdown('~~', '~~', 'strikethrough'), title: 'Strikethrough' },
-    ]},
-    { group: 'heading', items: [
-      { icon: Heading1, action: () => insertMarkdown('# ', '', 'Heading 1'), title: 'Heading 1' },
-      { icon: Heading2, action: () => insertMarkdown('## ', '', 'Heading 2'), title: 'Heading 2' },
-      { icon: Heading3, action: () => insertMarkdown('### ', '', 'Heading 3'), title: 'Heading 3' },
-    ]},
-    { group: 'list', items: [
-      { icon: List, action: () => insertMarkdown('- ', '', 'list item'), title: 'Bullet List' },
-      { icon: ListOrdered, action: () => insertMarkdown('1. ', '', 'list item'), title: 'Numbered List' },
-      { icon: CheckSquare, action: () => insertMarkdown('- [ ] ', '', 'task'), title: 'Task List' },
-    ]},
-    { group: 'insert', items: [
-      { icon: Code, action: () => insertMarkdown('`', '`', 'code'), title: 'Inline Code' },
-      { icon: Quote, action: () => insertMarkdown('> ', '', 'quote'), title: 'Blockquote' },
-      { icon: Link, action: () => insertMarkdown('[', '](url)', 'link text'), title: 'Link' },
-      { icon: Image, action: () => insertMarkdown('![', '](url)', 'alt text'), title: 'Image' },
-      { icon: Table, action: handleOpenTableModal, title: 'Table' },
-      { icon: Minus, action: () => insertMarkdown('\n---\n', '', ''), title: 'Horizontal Rule' },
-    ]},
-  ];
+  if (!note) return null;
 
   return (
     <div className="markdown-editor-wrap">
       {/* Formatting Toolbar */}
       <div className="editor-toolbar" style={{ borderBottom: 'none', paddingLeft: 'var(--space-xl)' }} role="toolbar" aria-label="Markdown formatting">
-        {toolbarButtons.map((group, gi) => (
+        {TOOLBAR_GROUPS.map((group, gi) => (
           <div key={group.group} style={{ display: 'contents' }}>
             {gi > 0 && <div className="toolbar-divider" aria-hidden="true" />}
             <div className="toolbar-group">
-              {group.items.map(({ icon: Icon, action, title }) => (
-                <button
-                  key={title}
-                  className="toolbar-btn"
-                  onClick={action}
-                  title={title}
-                  aria-label={title}
-                >
-                  <Icon className="icon" size={16} aria-hidden="true" />
-                </button>
-              ))}
+              {group.items.map((item) => {
+                const ItemIcon = item.icon;
+                return (
+                  <button
+                    key={item.key}
+                    className="toolbar-btn"
+                    onClick={() => handleToolbarAction(item.key)}
+                    title={item.title}
+                    aria-label={item.title}
+                  >
+                    <ItemIcon className="icon" size={16} aria-hidden="true" />
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}

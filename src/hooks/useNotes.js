@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import {
-  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy,
+  collection, doc, onSnapshot, query, orderBy,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { generateId, WELCOME_NOTE_CONTENT } from '../utils';
+import { useNoteActions } from './useNoteActions';
 
 function makeWelcomeNote() {
   const now = new Date().toISOString();
@@ -50,22 +51,85 @@ export function useNotes(userId) {
       });
   }, []);
 
+  const setLatestUpdateToken = useCallback((id, token) => {
+    latestUpdateTokenRef.current[id] = token;
+  }, []);
+
+  const isLatestUpdateToken = useCallback((id, token) => (
+    latestUpdateTokenRef.current[id] === token
+  ), []);
+
+  const setUpdateTimer = useCallback((id, timerId) => {
+    updateTimers.current[id] = timerId;
+  }, []);
+
+  const clearUpdateTimer = useCallback((id) => {
+    const timerId = updateTimers.current[id];
+    if (!timerId) return;
+    clearTimeout(timerId);
+    delete updateTimers.current[id];
+  }, []);
+
+  const incrementPendingWrites = useCallback(() => {
+    pendingRef.current += 1;
+    return pendingRef.current;
+  }, []);
+
+  const decrementPendingWrites = useCallback(() => {
+    pendingRef.current -= 1;
+    return pendingRef.current;
+  }, []);
+
+  const {
+    seedWelcomeNote,
+    createNote,
+    updateNote,
+    deleteNote,
+    restoreNote,
+    permanentlyDeleteNote,
+    emptyTrash,
+    duplicateNote,
+    togglePin,
+    moveToNotebook,
+    addTag,
+    removeTag,
+  } = useNoteActions({
+    userId,
+    notes,
+    setNotes,
+    setSaving,
+    setError,
+    trackWrite,
+    noteRef,
+    generateId,
+    setLatestUpdateToken,
+    isLatestUpdateToken,
+    setUpdateTimer,
+    clearUpdateTimer,
+    incrementPendingWrites,
+    decrementPendingWrites,
+  });
+
   useEffect(() => {
     Object.values(updateTimers.current).forEach((timerId) => clearTimeout(timerId));
     updateTimers.current = {};
     latestUpdateTokenRef.current = {};
 
     if (!userId) {
-      setNotes([]);
-      setLoading(false);
-      setSaving(false);
-      setError(null);
-      hasSeededWelcomeRef.current = false;
-      return;
+      const resetTimer = setTimeout(() => {
+        setNotes([]);
+        setLoading(false);
+        setSaving(false);
+        setError(null);
+        hasSeededWelcomeRef.current = false;
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
-    setLoading(true);
-    setError(null);
+    const startSyncTimer = setTimeout(() => {
+      setLoading(true);
+      setError(null);
+    }, 0);
 
     const notesQuery = query(notesRef(userId), orderBy('updatedAt', 'desc'));
     const unsubscribe = onSnapshot(
@@ -75,11 +139,7 @@ export function useNotes(userId) {
           if (!hasSeededWelcomeRef.current) {
             hasSeededWelcomeRef.current = true;
             const welcome = makeWelcomeNote();
-            setNotes([welcome]);
-            trackWrite(setDoc(noteRef(userId, welcome.id), welcome), {
-              message: 'Failed to create welcome note.',
-              onError: () => setNotes([]),
-            });
+            seedWelcomeNote(welcome);
           } else {
             setNotes([]);
           }
@@ -97,193 +157,12 @@ export function useNotes(userId) {
     );
 
     return () => {
+      clearTimeout(startSyncTimer);
       unsubscribe();
       Object.values(updateTimers.current).forEach((timerId) => clearTimeout(timerId));
       updateTimers.current = {};
     };
-  }, [userId, trackWrite]);
-
-  const createNote = useCallback((notebookId = 'resources') => {
-    if (!userId) return null;
-    const now = new Date().toISOString();
-    const note = {
-      id: generateId(),
-      title: '',
-      content: '',
-      notebookId,
-      tags: [],
-      createdAt: now,
-      updatedAt: now,
-      pinned: false,
-      trashed: false,
-    };
-    setNotes((prev) => [note, ...prev]);
-    trackWrite(setDoc(noteRef(userId, note.id), note), {
-      message: 'Failed to create note.',
-      onError: () => setNotes((prev) => prev.filter((n) => n.id !== note.id)),
-    });
-    return note;
-  }, [userId, trackWrite]);
-
-  const updateNote = useCallback((id, updates) => {
-    if (!userId) return;
-    const updated = { ...updates, updatedAt: new Date().toISOString() };
-    const updateToken = Date.now() + Math.random();
-    latestUpdateTokenRef.current[id] = updateToken;
-
-    let previousNote = null;
-    setNotes((prev) => {
-      previousNote = prev.find((n) => n.id === id) || null;
-      return prev.map((n) => (n.id === id ? { ...n, ...updated } : n));
-    });
-
-    setSaving(true);
-    setError(null);
-    if (updateTimers.current[id]) clearTimeout(updateTimers.current[id]);
-    updateTimers.current[id] = setTimeout(() => {
-      pendingRef.current += 1;
-      updateDoc(noteRef(userId, id), updated)
-        .catch((writeError) => {
-          const isLatest = latestUpdateTokenRef.current[id] === updateToken;
-          if (isLatest && previousNote) {
-            setNotes((prev) => prev.map((n) => (n.id === id ? previousNote : n)));
-          }
-          setError('Failed to save note changes. Please retry.');
-          console.error(writeError);
-        })
-        .finally(() => {
-          pendingRef.current -= 1;
-          if (pendingRef.current === 0) setSaving(false);
-          delete updateTimers.current[id];
-        });
-    }, 800);
-  }, [userId]);
-
-  const deleteNote = useCallback((id) => {
-    if (!userId) return;
-    const updated = { trashed: true, updatedAt: new Date().toISOString() };
-    const originalNote = notes.find((n) => n.id === id);
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
-      message: 'Failed to move note to trash.',
-      onError: () => {
-        if (!originalNote) return;
-        setNotes((prev) => prev.map((n) => (n.id === id ? originalNote : n)));
-      },
-    });
-  }, [userId, notes, trackWrite]);
-
-  const restoreNote = useCallback((id) => {
-    if (!userId) return;
-    const updated = { trashed: false, updatedAt: new Date().toISOString() };
-    const originalNote = notes.find((n) => n.id === id);
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
-      message: 'Failed to restore note.',
-      onError: () => {
-        if (!originalNote) return;
-        setNotes((prev) => prev.map((n) => (n.id === id ? originalNote : n)));
-      },
-    });
-  }, [userId, notes, trackWrite]);
-
-  const permanentlyDeleteNote = useCallback((id) => {
-    if (!userId) return;
-    const removedNote = notes.find((n) => n.id === id);
-    setNotes((prev) => prev.filter((n) => n.id !== id));
-    trackWrite(deleteDoc(noteRef(userId, id)), {
-      message: 'Failed to permanently delete note.',
-      onError: () => {
-        if (!removedNote) return;
-        setNotes((prev) => [removedNote, ...prev]);
-      },
-    });
-  }, [userId, notes, trackWrite]);
-
-  const emptyTrash = useCallback(() => {
-    if (!userId) return;
-    const trashed = notes.filter((n) => n.trashed);
-    setNotes((prev) => prev.filter((n) => !n.trashed));
-    Promise.all(trashed.map((n) => deleteDoc(noteRef(userId, n.id))))
-      .catch((writeError) => {
-        setNotes((prev) => [...trashed, ...prev]);
-        setError('Failed to empty trash. Please try again.');
-        console.error(writeError);
-      });
-  }, [userId, notes]);
-
-  const duplicateNote = useCallback((id) => {
-    if (!userId) return null;
-    const note = notes.find((n) => n.id === id);
-    if (!note) return null;
-    const now = new Date().toISOString();
-    const copy = {
-      ...note,
-      id: generateId(),
-      title: note.title ? `${note.title} (Copy)` : 'Untitled (Copy)',
-      createdAt: now,
-      updatedAt: now,
-      pinned: false,
-    };
-    setNotes((prev) => [copy, ...prev]);
-    trackWrite(setDoc(noteRef(userId, copy.id), copy), {
-      message: 'Failed to duplicate note.',
-      onError: () => setNotes((prev) => prev.filter((n) => n.id !== copy.id)),
-    });
-    return copy;
-  }, [userId, notes, trackWrite]);
-
-  const togglePin = useCallback((id) => {
-    if (!userId) return;
-    const note = notes.find((n) => n.id === id);
-    if (!note) return;
-    const updated = { pinned: !note.pinned, updatedAt: new Date().toISOString() };
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
-      message: 'Failed to update pin state.',
-      onError: () => setNotes((prev) => prev.map((n) => (n.id === id ? note : n))),
-    });
-  }, [userId, notes, trackWrite]);
-
-  const moveToNotebook = useCallback((id, notebookId) => {
-    if (!userId) return;
-    const previousNote = notes.find((n) => n.id === id);
-    const updated = { notebookId, updatedAt: new Date().toISOString() };
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
-      message: 'Failed to move note to notebook.',
-      onError: () => {
-        if (!previousNote) return;
-        setNotes((prev) => prev.map((n) => (n.id === id ? previousNote : n)));
-      },
-    });
-  }, [userId, notes, trackWrite]);
-
-  const addTag = useCallback((id, tag) => {
-    if (!userId) return;
-    const note = notes.find((n) => n.id === id);
-    if (!note || note.tags.includes(tag)) return;
-    const tags = [...note.tags, tag];
-    const updated = { tags, updatedAt: new Date().toISOString() };
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, tags } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
-      message: 'Failed to add tag.',
-      onError: () => setNotes((prev) => prev.map((n) => (n.id === id ? note : n))),
-    });
-  }, [userId, notes, trackWrite]);
-
-  const removeTag = useCallback((id, tag) => {
-    if (!userId) return;
-    const note = notes.find((n) => n.id === id);
-    if (!note) return;
-    const tags = note.tags.filter((t) => t !== tag);
-    const updated = { tags, updatedAt: new Date().toISOString() };
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, tags } : n)));
-    trackWrite(updateDoc(noteRef(userId, id), updated), {
-      message: 'Failed to remove tag.',
-      onError: () => setNotes((prev) => prev.map((n) => (n.id === id ? note : n))),
-    });
-  }, [userId, notes, trackWrite]);
+  }, [userId, seedWelcomeNote]);
 
   // Get all unique tags
   const allTags = [...new Set(notes.filter((n) => !n.trashed).flatMap((n) => n.tags))].sort();

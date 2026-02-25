@@ -38,12 +38,15 @@ marked.setOptions({
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(code, { language: lang }).value;
-      } catch (e) {}
+      } catch {
+        return hljs.highlightAuto(code).value;
+      }
     }
     try {
       return hljs.highlightAuto(code).value;
-    } catch (e) {}
-    return code;
+    } catch {
+      return code;
+    }
   },
 });
 
@@ -54,7 +57,7 @@ export default function Preview({ content }) {
       return DOMPurify.sanitize(marked.parse(content), {
         USE_PROFILES: { html: true },
       });
-    } catch (e) {
+    } catch {
       return '<p>Error rendering preview</p>';
     }
   }, [content]);

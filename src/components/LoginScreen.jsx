@@ -52,17 +52,20 @@ export default function LoginScreen({ onSignIn, error }) {
           </p>
 
           <div className="login-features">
-            {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="login-feature-item">
+            {features.map((feature) => {
+              const FeatureIcon = feature.icon;
+              return (
+                <div key={feature.title} className="login-feature-item">
                 <div className="login-feature-icon">
-                  <Icon size={16} />
+                    <FeatureIcon size={16} />
                 </div>
                 <div>
-                  <div className="login-feature-title">{title}</div>
-                  <div className="login-feature-desc">{desc}</div>
+                    <div className="login-feature-title">{feature.title}</div>
+                    <div className="login-feature-desc">{feature.desc}</div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

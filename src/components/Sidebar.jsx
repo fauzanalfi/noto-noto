@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   BookOpen, Compass, Rocket, Archive, FileText,
   Pin, Trash2, Plus, ChevronDown, ChevronRight,
@@ -30,7 +30,6 @@ export default function Sidebar({
   setActiveTag,
   allTags,
   noteCountByNotebook,
-  noteCountByTag,
   totalNotes,
   pinnedCount,
   trashedCount,
@@ -56,7 +55,6 @@ export default function Sidebar({
   const [editingNotebook, setEditingNotebook] = useState(null);
   const [editName, setEditName] = useState('');
   const [movingNotebook, setMovingNotebook] = useState(null); // { id, anchorRect }
-  const moveButtonRefs = useRef({});
 
   const toggleCategory = (catId) => {
     setExpandedCategories((prev) => ({ ...prev, [catId]: !prev[catId] }));
@@ -346,11 +344,13 @@ export default function Sidebar({
           borderRadius: 'var(--radius-md)',
           padding: '3px',
         }}>
-          {THEME_OPTIONS.map(({ id, icon: ThemeIcon, label }) => (
-            <button
-              key={id}
-              onClick={() => onThemeChange(id)}
-              title={label}
+          {THEME_OPTIONS.map((themeOption) => {
+            const ThemeOptionIcon = themeOption.icon;
+            return (
+              <button
+                key={themeOption.id}
+                onClick={() => onThemeChange(themeOption.id)}
+                title={themeOption.label}
               style={{
                 flex: 1,
                 display: 'flex',
@@ -365,15 +365,16 @@ export default function Sidebar({
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 500,
                 transition: 'all var(--transition-fast)',
-                background: theme === id ? 'var(--accent-primary)' : 'transparent',
-                color: theme === id ? 'white' : 'var(--text-tertiary)',
-                boxShadow: theme === id ? 'var(--shadow-sm)' : 'none',
+                background: theme === themeOption.id ? 'var(--accent-primary)' : 'transparent',
+                color: theme === themeOption.id ? 'white' : 'var(--text-tertiary)',
+                boxShadow: theme === themeOption.id ? 'var(--shadow-sm)' : 'none',
               }}
             >
-              <ThemeIcon size={14} />
-              {label}
-            </button>
-          ))}
+                <ThemeOptionIcon size={14} />
+                {themeOption.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </aside>

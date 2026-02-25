@@ -26,14 +26,18 @@ export function useNotebooks(userId) {
 
   useEffect(() => {
     if (!userId) {
-      setNotebooks([]);
-      setLoading(false);
-      setError(null);
-      return;
+      const resetTimer = setTimeout(() => {
+        setNotebooks([]);
+        setLoading(false);
+        setError(null);
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
-    setLoading(true);
-    setError(null);
+    const startSyncTimer = setTimeout(() => {
+      setLoading(true);
+      setError(null);
+    }, 0);
 
     let hasSeededDefaults = false;
     const unsubscribe = onSnapshot(
@@ -64,7 +68,10 @@ export function useNotebooks(userId) {
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(startSyncTimer);
+      unsubscribe();
+    };
   }, [userId]);
 
   const createNotebook = useCallback((name, paraCategory = 'resources') => {

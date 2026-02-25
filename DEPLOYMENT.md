@@ -152,56 +152,52 @@ netlify deploy --prod --dir=dist
 
 ## 6. Deploy to GitHub Pages
 
-### Step 1: Configure `vite.config.js`
+This repository includes an automated workflow at `.github/workflows/deploy-gh-pages.yml`.
 
-Add a `base` path matching your GitHub repo name:
+### Step 1: Push code to `main`
 
-```js
-// vite.config.js
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+The workflow deploys on:
 
-export default defineConfig({
-  plugins: [react()],
-  base: "/noto-noto/", // Replace with your repo name
-});
-```
+- push to `main`
+- manual run from Actions tab (`workflow_dispatch`)
 
-### Step 2: Build
+### Step 2: Add GitHub repository secrets
 
-```bash
-npm run build
-```
+Go to **Settings → Secrets and variables → Actions** and add:
 
-### Step 3: Deploy with `gh-pages`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
 
-```bash
-# Install gh-pages
-npm install -D gh-pages
+### Step 3: Enable GitHub Pages with Actions
 
-# Add deploy script to package.json:
-# "deploy": "gh-pages -d dist"
+Go to **Settings → Pages**:
 
-# Deploy
-npm run deploy
-```
+1. **Source**: `GitHub Actions`
+2. Save
 
-Or add this to `package.json` scripts:
+### Step 4: Trigger deployment
 
-```json
-{
-  "scripts": {
-    "deploy": "gh-pages -d dist"
-  }
-}
-```
+- Push to `main`, or
+- Run **Deploy to GitHub Pages** manually from the **Actions** tab
 
-### Step 4: Enable GitHub Pages
+### Step 5: Open your demo URL
 
-1. Go to your repo → **Settings** → **Pages**
-2. Source: **Deploy from a branch**
-3. Branch: `gh-pages` / `root`
-4. Your app will be at: `https://<username>.github.io/noto-noto/`
+Your app will be served at:
+
+`https://<username>.github.io/<repo-name>/`
+
+For this repo name, it is typically:
+
+`https://<username>.github.io/noto-noto/`
+
+### Notes
+
+- Vite base path is configured via `VITE_BASE_PATH` in the workflow.
+- No `gh-pages` branch or package is required with this setup.
 
 ---
 
