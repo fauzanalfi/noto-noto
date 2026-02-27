@@ -158,6 +158,15 @@ noto-noto/
 - [Deployment Guide](DEPLOYMENT.md) — hosting and deployment options
 - [Changelog](CHANGELOG.md) — recent project updates
 
+## 🌐 Community & Governance
+
+- [Code of Conduct](.github/CODE_OF_CONDUCT.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](.github/SECURITY.md)
+- [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.md)
+- [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.md)
+- [Pull Request Template](.github/pull_request_template.md)
+
 ## 🧪 Testing
 
 Tests are written with Vitest and React Testing Library.
