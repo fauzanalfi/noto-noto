@@ -32,7 +32,24 @@
 
 ## 🖼️ Screenshots
 
-> _Add screenshots here once deployed._
+<table>
+  <tr>
+    <td><strong>Dark Theme</strong></td>
+    <td><strong>Light Theme</strong></td>
+  </tr>
+  <tr>
+    <td><img src="public/noto-dark-screenshot.png" alt="Noto Dark Theme" /></td>
+    <td><img src="public/noto-light-screenshot.png" alt="Noto Light Theme" /></td>
+  </tr>
+  <tr>
+    <td><strong>Eye Care Theme</strong></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><img src="public/noto-eyecare-screenshot.png" alt="Noto Eye Care Theme" /></td>
+    <td></td>
+  </tr>
+</table>
 
 ## 🛠️ Tech Stack
 
