@@ -18,16 +18,19 @@
 ## ✨ Features
 
 - **PARA Method + Inbox** — Organise notes into Inbox (holding area), Projects, Areas, Resources & Archive
-- **Markdown Editor** — Full toolbar with Bold, Italic, Headings, Lists, Code, Links, and more
+- **Markdown Editor** — Full toolbar with Bold, Italic, Headings, Lists, Code, Links, and more; syntax-highlighted preview
 - **Live Split Preview** — Side-by-side editing and rendered preview
 - **Notebooks & Tags** — Flexible hierarchy with coloured notebooks and free-form tagging
 - **Pin & Trash** — Star important notes; soft-delete with full restore support
+- **Tasks View** — Aggregated checklist across all notes; toggle task completion inline
+- **Kanban Board** — Board view with Backlog / In Progress / Done columns and drag-and-drop
 - **Quick Switcher** — `Ctrl/Cmd+K` to jump to any note instantly
 - **Zen Mode** — Distraction-free full-screen writing
 - **Real-time Sync** — Powered by Firebase Firestore; all devices stay in sync
 - **Three Themes** — Dark, Light, and Eye Care (warm sepia)
 - **PWA Ready** — Installable on desktop and mobile, works offline-aware
-- **Export** — Export individual notes as `.md` or back up everything as JSON
+- **Export** — Export notes as `.md`, `.md zip` (current list or all notes), or full JSON backup
+- **Demo Mode** — Runs without Firebase credentials using localStorage (used on GitHub Pages demo)
 - **Google Auth** — Secure sign-in; notes are private to each account
 
 ## 🖼️ Screenshots
@@ -61,6 +64,7 @@
 | Auth | Firebase Authentication (Google) |
 | Database | Firebase Firestore |
 | Markdown | `marked` + `DOMPurify` |
+| Syntax Highlighting | `highlight.js` |
 | Deployment | Vercel |
 
 ## 🚀 Getting Started
@@ -140,7 +144,7 @@ noto-noto/
 ├── public/             # Static assets, favicon, PWA manifest
 ├── src/
 │   ├── components/     # UI components (Editor, Sidebar, NotesList, …)
-│   ├── hooks/          # Custom React hooks (useNotes, useAuth, …)
+│   ├── hooks/          # Custom React hooks (useNotes, useNoteActions, useAuth, …)
 │   ├── assets/         # Images and SVGs
 │   ├── test/           # Test setup files
 │   ├── App.jsx         # Root layout and state
