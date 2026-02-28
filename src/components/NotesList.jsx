@@ -18,12 +18,14 @@ export default function NotesList({
   searchQuery,
   onSearchChange,
   title,
+  forcedBoardView = false,
   isTrash,
   onEmptyTrash,
 }) {
   const [sortBy, setSortBy] = useState('updated');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [boardView, setBoardView] = useState(false);
+  const effectiveBoardView = forcedBoardView || boardView;
 
   const sortedNotes = useMemo(() => {
     const arr = [...notes];
@@ -42,15 +44,15 @@ export default function NotesList({
             {notes.length} note{notes.length !== 1 ? 's' : ''}
           </span>
           {/* Board / List toggle */}
-          {!isTrash && (
+          {!isTrash && !forcedBoardView && (
             <button
               className="toolbar-btn"
               style={{ minWidth: 'auto', height: '26px', padding: '2px 6px' }}
               onClick={() => setBoardView((v) => !v)}
-              title={boardView ? 'List view' : 'Board view'}
-              aria-label={boardView ? 'Switch to list view' : 'Switch to board view'}
+              title={effectiveBoardView ? 'List view' : 'Board view'}
+              aria-label={effectiveBoardView ? 'Switch to list view' : 'Switch to board view'}
             >
-              {boardView ? <List size={12} /> : <LayoutGrid size={12} />}
+              {effectiveBoardView ? <List size={12} /> : <LayoutGrid size={12} />}
             </button>
           )}
           {/* Sort button */}
@@ -117,7 +119,7 @@ export default function NotesList({
       </div>
 
       {/* Notes — list or board */}
-      {boardView && !isTrash ? (
+      {effectiveBoardView && !isTrash ? (
         <KanbanBoard
           notes={notes}
           activeNoteId={activeNoteId}

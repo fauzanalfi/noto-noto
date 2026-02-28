@@ -94,6 +94,7 @@ export default function App() {
     if (activeView === 'pinned') return 'Starred';
     if (activeView === 'trash') return 'Trash';
     if (activeView === 'tasks') return 'Tasks';
+    if (activeView === 'kanban') return 'Kanban Board';
     if (activeView === 'tag') return `#${activeTag}`;
     if (activeView === 'notebook') {
       const nb = notebooks.find((n) => n.id === activeNotebookId);
@@ -283,6 +284,7 @@ export default function App() {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               title={listTitle}
+              forcedBoardView={activeView === 'kanban'}
               isTrash={activeView === 'trash'}
               onEmptyTrash={emptyTrash}
             />

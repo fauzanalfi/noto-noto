@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   BookOpen, Compass, Rocket, Archive, FileText,
   Pin, Trash2, Plus, ChevronDown, ChevronRight,
-  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox, CheckSquare
+  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox, CheckSquare, LayoutGrid
 } from 'lucide-react';
 import { DEFAULT_PARA_CATEGORIES } from '../utils';
 
@@ -124,6 +124,14 @@ export default function Sidebar({
             <CheckSquare className="icon" size={18} />
             Tasks
             {tasksCount > 0 && <span className="count">{tasksCount}</span>}
+          </button>
+          <button
+            className={`sidebar-item ${activeView === 'kanban' ? 'active' : ''}`}
+            onClick={() => handleNavClick('kanban')}
+          >
+            <LayoutGrid className="icon" size={18} />
+            Kanban Board
+            <span className="count">{totalNotes}</span>
           </button>
           <button
             className={`sidebar-item ${activeView === 'trash' ? 'active' : ''}`}
