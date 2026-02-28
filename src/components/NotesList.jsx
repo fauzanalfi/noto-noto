@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Pin, ArrowUpDown, Trash2 } from 'lucide-react';
+import { Search, Plus, Pin, ArrowUpDown, Trash2, List, LayoutGrid } from 'lucide-react';
 import { formatDate, extractSnippet } from '../utils';
+import KanbanBoard from './KanbanBoard';
 
 const SORT_OPTIONS = [
   { id: 'updated', label: 'Last modified' },
@@ -13,6 +14,7 @@ export default function NotesList({
   activeNoteId,
   onSelectNote,
   onCreateNote,
+  onUpdateNote,
   searchQuery,
   onSearchChange,
   title,
@@ -21,6 +23,7 @@ export default function NotesList({
 }) {
   const [sortBy, setSortBy] = useState('updated');
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [boardView, setBoardView] = useState(false);
 
   const sortedNotes = useMemo(() => {
     const arr = [...notes];
@@ -38,6 +41,18 @@ export default function NotesList({
           <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>
             {notes.length} note{notes.length !== 1 ? 's' : ''}
           </span>
+          {/* Board / List toggle */}
+          {!isTrash && (
+            <button
+              className="toolbar-btn"
+              style={{ minWidth: 'auto', height: '26px', padding: '2px 6px' }}
+              onClick={() => setBoardView((v) => !v)}
+              title={boardView ? 'List view' : 'Board view'}
+              aria-label={boardView ? 'Switch to list view' : 'Switch to board view'}
+            >
+              {boardView ? <List size={12} /> : <LayoutGrid size={12} />}
+            </button>
+          )}
           {/* Sort button */}
           <div style={{ position: 'relative' }}>
             <button
@@ -101,7 +116,16 @@ export default function NotesList({
         />
       </div>
 
-      {/* Notes */}
+      {/* Notes — list or board */}
+      {boardView && !isTrash ? (
+        <KanbanBoard
+          notes={notes}
+          activeNoteId={activeNoteId}
+          onSelectNote={onSelectNote}
+          onCreateNote={onCreateNote}
+          onUpdateNote={onUpdateNote}
+        />
+      ) : (
       <div className="notes-list-scroll">
         {notes.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-tertiary)' }}>
@@ -150,6 +174,7 @@ export default function NotesList({
           ))
         )}
       </div>
+      )}
 
       {/* FAB: New Note */}
       <button className="new-note-btn" onClick={onCreateNote} title="New Note" aria-label="Create new note">

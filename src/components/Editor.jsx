@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useMemo } from 'react';
 import { countWords } from '../utils';
 import {
   Bold, Italic, Strikethrough, Heading1, Heading2, Heading3,
@@ -43,11 +43,24 @@ const TOOLBAR_GROUPS = [
   },
 ];
 
-export default function Editor({ note, onUpdateNote }) {
+const WIKI_DROPDOWN_BLUR_DELAY = 150; // ms – lets click events fire before hiding dropdown
+
+export default function Editor({ note, onUpdateNote, notes = [] }) {
   const textareaRef = useRef(null);
   const [showTableModal, setShowTableModal] = useState(false);
   const [tableRows, setTableRows] = useState(2);
   const [tableCols, setTableCols] = useState(3);
+  const [wikiQuery, setWikiQuery] = useState('');
+  const [wikiPos, setWikiPos] = useState(null); // { top, left, caretPos }
+  const [wikiSelectedIdx, setWikiSelectedIdx] = useState(0);
+
+  const wikiSuggestions = useMemo(() => {
+    if (wikiPos === null) return [];
+    return notes
+      .filter((n) => n.id !== note?.id && !n.trashed &&
+        (n.title || 'Untitled').toLowerCase().includes(wikiQuery.toLowerCase()))
+      .slice(0, 8);
+  }, [wikiQuery, wikiPos, notes, note]);
 
   const insertMarkdown = useCallback(
     (before, after = '', placeholder = '') => {
@@ -124,7 +137,78 @@ export default function Editor({ note, onUpdateNote }) {
     setShowTableModal(false);
   };
 
+  const insertWikiLink = useCallback((targetNote) => {
+    const textarea = textareaRef.current;
+    if (!textarea || !targetNote) return;
+    const pos = textarea.selectionStart;
+    const before = textarea.value.substring(0, pos);
+    const after = textarea.value.substring(pos);
+    // Find the opening [[
+    const bracketIdx = before.lastIndexOf('[[');
+    if (bracketIdx === -1) return;
+    const title = targetNote.title || 'Untitled';
+    const newValue = before.substring(0, bracketIdx) + `[[${title}]]` + after;
+    onUpdateNote(note.id, { content: newValue });
+    setWikiPos(null);
+    setWikiQuery('');
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = bracketIdx + title.length + 4;
+      textarea.setSelectionRange(newPos, newPos);
+    }, 0);
+  }, [note, onUpdateNote]);
+
+  const handleChange = useCallback((e) => {
+    const value = e.target.value;
+    onUpdateNote(note.id, { content: value });
+
+    // Detect [[ for wiki link autocomplete
+    const pos = e.target.selectionStart;
+    const before = value.substring(0, pos);
+    const bracketIdx = before.lastIndexOf('[[');
+    if (bracketIdx !== -1) {
+      const query = before.substring(bracketIdx + 2);
+      // Only show if no closing ]] between [[ and cursor
+      if (!query.includes(']')) {
+        setWikiQuery(query);
+        setWikiSelectedIdx(0);
+        // Calculate position for dropdown
+        const textarea = textareaRef.current;
+        if (textarea) {
+          setWikiPos({ caretPos: pos });
+        }
+        return;
+      }
+    }
+    setWikiPos(null);
+    setWikiQuery('');
+  }, [note, onUpdateNote]);
+
   const handleKeyDown = (e) => {
+    // Wiki link autocomplete navigation
+    if (wikiPos !== null && wikiSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setWikiSelectedIdx((i) => Math.min(i + 1, wikiSuggestions.length - 1));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setWikiSelectedIdx((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        insertWikiLink(wikiSuggestions[wikiSelectedIdx]);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setWikiPos(null);
+        setWikiQuery('');
+        return;
+      }
+    }
+
     // Tab key for indentation
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -286,16 +370,42 @@ export default function Editor({ note, onUpdateNote }) {
       )}
 
       {/* Textarea */}
-      <textarea
-        ref={textareaRef}
-        className="markdown-textarea"
-        value={note.content}
-        onChange={(e) => onUpdateNote(note.id, { content: e.target.value })}
-        onKeyDown={handleKeyDown}
-        placeholder="Start writing in Markdown..."
-        spellCheck={false}
-        aria-label="Note content editor"
-      />
+      <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <textarea
+          ref={textareaRef}
+          className="markdown-textarea"
+          value={note.content}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onBlur={() => setTimeout(() => { setWikiPos(null); setWikiQuery(''); }, WIKI_DROPDOWN_BLUR_DELAY)}
+          placeholder="Start writing in Markdown… type [[ to link a note"
+          spellCheck={false}
+          aria-label="Note content editor"
+        />
+
+        {/* Wiki-link autocomplete dropdown */}
+        {wikiPos !== null && wikiSuggestions.length > 0 && (
+          <div className="wiki-dropdown" role="listbox" aria-label="Note suggestions">
+            <div className="wiki-dropdown-header">Link to note</div>
+            {wikiSuggestions.map((n, i) => (
+              <button
+                key={n.id}
+                className={`wiki-dropdown-item${i === wikiSelectedIdx ? ' active' : ''}`}
+                onMouseDown={(e) => { e.preventDefault(); insertWikiLink(n); }}
+                role="option"
+                aria-selected={i === wikiSelectedIdx}
+              >
+                {n.title || 'Untitled'}
+              </button>
+            ))}
+          </div>
+        )}
+        {wikiPos !== null && wikiSuggestions.length === 0 && wikiQuery.length > 0 && (
+          <div className="wiki-dropdown">
+            <div className="wiki-dropdown-empty">No matching notes</div>
+          </div>
+        )}
+      </div>
 
       {/* Word count bar */}
       <div className="word-count-bar">

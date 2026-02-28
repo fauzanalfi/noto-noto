@@ -46,6 +46,7 @@ export function useNoteActions({
       updatedAt: now,
       pinned: false,
       trashed: false,
+      status: 'backlog',
     };
     setNotes((prev) => [note, ...prev]);
     trackWrite(setDocFn(noteRef(userId, note.id), note), {

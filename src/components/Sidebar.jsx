@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   BookOpen, Compass, Rocket, Archive, FileText,
   Pin, Trash2, Plus, ChevronDown, ChevronRight,
-  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox
+  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox, CheckSquare
 } from 'lucide-react';
 import { DEFAULT_PARA_CATEGORIES } from '../utils';
 
@@ -33,6 +33,7 @@ export default function Sidebar({
   totalNotes,
   pinnedCount,
   trashedCount,
+  tasksCount,
   onCreateNotebook,
   onRenameNotebook,
   onDeleteNotebook,
@@ -115,6 +116,14 @@ export default function Sidebar({
             <Pin className="icon" size={18} />
             Starred
             <span className="count">{pinnedCount}</span>
+          </button>
+          <button
+            className={`sidebar-item ${activeView === 'tasks' ? 'active' : ''}`}
+            onClick={() => handleNavClick('tasks')}
+          >
+            <CheckSquare className="icon" size={18} />
+            Tasks
+            {tasksCount > 0 && <span className="count">{tasksCount}</span>}
           </button>
           <button
             className={`sidebar-item ${activeView === 'trash' ? 'active' : ''}`}
