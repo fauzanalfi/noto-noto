@@ -50,22 +50,49 @@ marked.setOptions({
   },
 });
 
-export default function Preview({ content }) {
+function resolveWikiLinks(content, notes) {
+  if (!notes || notes.length === 0) return content;
+  return content.replace(/\[\[([^\]]+)\]\]/g, (match, title) => {
+    const target = notes.find(
+      (n) => !n.trashed && (n.title || '').toLowerCase() === title.trim().toLowerCase()
+    );
+    if (target) {
+      return `<a class="wiki-link" data-note-id="${target.id}">${title}</a>`;
+    }
+    return `<a class="wiki-link wiki-link-missing">${title}</a>`;
+  });
+}
+
+export default function Preview({ content, notes = [], onNavigateNote }) {
   const html = useMemo(() => {
     if (!content) return '<p style="color: var(--text-tertiary); font-style: italic;">Nothing to preview yet...</p>';
     try {
-      return DOMPurify.sanitize(marked.parse(content), {
+      const withWikiLinks = resolveWikiLinks(content, notes);
+      return DOMPurify.sanitize(marked.parse(withWikiLinks), {
         USE_PROFILES: { html: true },
+        ADD_ATTR: ['data-note-id', 'class'],
       });
     } catch {
       return '<p>Error rendering preview</p>';
     }
-  }, [content]);
+  }, [content, notes]);
+
+  const handleClick = (e) => {
+    const link = e.target.closest('a.wiki-link');
+    if (link) {
+      e.preventDefault();
+      const noteId = link.dataset.noteId;
+      if (noteId && onNavigateNote) {
+        onNavigateNote(noteId);
+      }
+    }
+  };
 
   return (
     <div
       className="markdown-preview"
       dangerouslySetInnerHTML={{ __html: html }}
+      onClick={handleClick}
     />
   );
 }

@@ -14,6 +14,7 @@ import QuickSwitcher from './components/QuickSwitcher';
 import LoginScreen from './components/LoginScreen';
 import NoteToolbar from './components/NoteToolbar';
 import TagManager from './components/TagManager';
+import TasksView from './components/TasksView';
 import {
   exportNoteAsMarkdown,
   exportAllNotesAsMarkdownZip,
@@ -55,10 +56,11 @@ export default function App() {
     const filters = { search: debouncedSearchQuery };
     if (activeView === 'trash') filters.trashed = true;
     else if (activeView === 'pinned') filters.pinned = true;
+    else if (activeView === 'tasks') return notes.filter((n) => !n.trashed);
     else if (activeView === 'notebook') filters.notebookId = activeNotebookId;
     else if (activeView === 'tag') filters.tag = activeTag;
     return getFilteredNotes(filters);
-  }, [activeView, activeNotebookId, activeTag, debouncedSearchQuery, getFilteredNotes]);
+  }, [activeView, activeNotebookId, activeTag, debouncedSearchQuery, getFilteredNotes, notes]);
 
   const activeNote = useMemo(
     () => notes.find((n) => n.id === activeNoteId) || null,
@@ -73,16 +75,25 @@ export default function App() {
     return counts;
   }, [notes]);
 
-  const { totalNotes, pinnedCount, trashedCount } = useMemo(() => ({
-    totalNotes: notes.filter((n) => !n.trashed).length,
-    pinnedCount: notes.filter((n) => !n.trashed && n.pinned).length,
-    trashedCount: notes.filter((n) => n.trashed).length,
-  }), [notes]);
+  const { totalNotes, pinnedCount, trashedCount, tasksCount } = useMemo(() => {
+    let tasks = 0;
+    notes.filter((n) => !n.trashed && n.content).forEach((n) => {
+      const matches = n.content.match(/^(\s*)-\s+\[ \]\s+.+/gm);
+      if (matches) tasks += matches.length;
+    });
+    return {
+      totalNotes: notes.filter((n) => !n.trashed).length,
+      pinnedCount: notes.filter((n) => !n.trashed && n.pinned).length,
+      trashedCount: notes.filter((n) => n.trashed).length,
+      tasksCount: tasks,
+    };
+  }, [notes]);
 
   const listTitle = useMemo(() => {
     if (activeView === 'all') return 'All Notes';
     if (activeView === 'pinned') return 'Starred';
     if (activeView === 'trash') return 'Trash';
+    if (activeView === 'tasks') return 'Tasks';
     if (activeView === 'tag') return `#${activeTag}`;
     if (activeView === 'notebook') {
       const nb = notebooks.find((n) => n.id === activeNotebookId);
@@ -217,6 +228,7 @@ export default function App() {
         totalNotes={totalNotes}
         pinnedCount={pinnedCount}
         trashedCount={trashedCount}
+        tasksCount={tasksCount}
         onCreateNotebook={createNotebook}
         onRenameNotebook={renameNotebook}
         onDeleteNotebook={deleteNotebook}
@@ -249,6 +261,17 @@ export default function App() {
         </div>
 
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {activeView === 'tasks' ? (
+            <div style={{ flex: 1, overflow: 'auto', padding: 'var(--space-xl)' }}>
+              <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>Tasks</h2>
+              <TasksView
+                notes={notes}
+                onUpdateNote={updateNote}
+                onSelectNote={(id) => { handleSelectNote(id); setActiveView('all'); }}
+              />
+            </div>
+          ) : (
+          <>
           <div className={`${showEditor ? 'notes-list-panel hidden' : ''}`}
                style={showEditor ? { display: undefined } : {}}>
             <NotesList
@@ -256,6 +279,7 @@ export default function App() {
               activeNoteId={activeNoteId}
               onSelectNote={handleSelectNote}
               onCreateNote={handleCreateNote}
+              onUpdateNote={updateNote}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               title={listTitle}
@@ -307,16 +331,18 @@ export default function App() {
 
               <div className="editor-content">
                 {(effectiveViewMode === 'edit' || effectiveViewMode === 'split') && (
-                  <Editor note={activeNote} onUpdateNote={updateNote} />
+                  <Editor note={activeNote} onUpdateNote={updateNote} notes={notes} onNavigateNote={handleSelectNote} />
                 )}
                 {effectiveViewMode === 'split' && <div className="split-divider" />}
                 {(effectiveViewMode === 'preview' || effectiveViewMode === 'split') && (
-                  <Preview content={activeNote.content} />
+                  <Preview content={activeNote.content} notes={notes} onNavigateNote={handleSelectNote} />
                 )}
               </div>
             </div>
           ) : (
             <EmptyState type={filteredNotes.length === 0 ? 'no-notes' : 'no-selection'} />
+          )}
+          </>
           )}
         </div>
       </div>
