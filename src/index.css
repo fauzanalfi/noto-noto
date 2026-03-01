@@ -552,6 +552,7 @@ body {
   padding: 0 var(--space-sm);
   padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 /* Note Card */
@@ -1350,6 +1351,10 @@ body {
     min-height: 0;
   }
 
+  .notes-list-scroll {
+    height: 100%;
+  }
+
   .notes-list-panel.hidden {
     display: none;
   }
@@ -1434,10 +1439,13 @@ body {
   }
 
   .new-note-btn {
-    bottom: calc(var(--space-xl) + env(safe-area-inset-bottom, 0px));
+    position: fixed;
+    bottom: var(--space-xl);
+    bottom: calc(var(--space-xl) + env(safe-area-inset-bottom));
     right: var(--space-xl);
     width: 52px;
     height: 52px;
+    z-index: calc(var(--z-overlay) - 1);
   }
 }
 

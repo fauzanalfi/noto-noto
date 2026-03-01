@@ -256,7 +256,7 @@ export default function App() {
         onClick={() => setSidebarOpen(false)}
       />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
         <div className="mobile-header">
           {showEditor ? (
             <button className="mobile-header-btn" onClick={handleBackToList}>
