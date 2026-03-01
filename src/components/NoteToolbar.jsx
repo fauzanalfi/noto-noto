@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import {
   BookOpen, Trash2, RotateCcw, Copy,
   ChevronDown, Pin, Maximize2, Minimize2,
-  Edit3, Eye, Columns, X,
+  Edit3, Eye, Columns, Rows3, X,
 } from 'lucide-react';
 import { formatFullDate } from '../utils';
 import MoveToNotebookMenu from './MoveToNotebookMenu';
@@ -185,15 +185,20 @@ export default function NoteToolbar({
           >
             <Edit3 className="icon" size={14} />
           </button>
-          {!isMobile && (
-            <button
-              className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
-              onClick={() => onViewModeChange('split')}
-              title="Split view"
-            >
-              <Columns className="icon" size={14} />
-            </button>
-          )}
+          <button
+            className={`view-mode-btn ${viewMode === 'split-horizontal' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('split-horizontal')}
+            title="Split horizontal (left/right)"
+          >
+            <Columns className="icon" size={14} />
+          </button>
+          <button
+            className={`view-mode-btn ${viewMode === 'split-vertical' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('split-vertical')}
+            title="Split vertical (top/bottom)"
+          >
+            <Rows3 className="icon" size={14} />
+          </button>
           <button
             className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
             onClick={() => onViewModeChange('preview')}

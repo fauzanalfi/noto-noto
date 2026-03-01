@@ -19,7 +19,7 @@ The app is a single-page React application backed by Firebase Authentication and
 - Google sign-in with private per-user data
 - PARA-based notebook organization
 - Notes with title, content, tags, pin, trash, and restore flow
-- Markdown editor with formatting toolbar and live preview
+- Markdown editor with formatting toolbar and flexible split preview (left/right or top/bottom)
 - Quick switcher (`Ctrl/Cmd + K`)
 - New note shortcut (`Ctrl/Cmd + N`)
 - Zen mode and responsive/mobile editing flow

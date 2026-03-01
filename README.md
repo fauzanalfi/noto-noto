@@ -19,7 +19,7 @@
 
 - **PARA Method + Inbox** — Organise notes into Inbox (holding area), Projects, Areas, Resources & Archive
 - **Markdown Editor** — Full toolbar with Bold, Italic, Headings, Lists, Code, Links, and more; syntax-highlighted preview
-- **Live Split Preview** — Side-by-side editing and rendered preview
+- **Flexible Split Preview** — Edit with left/right or top/bottom split preview
 - **Notebooks & Tags** — Flexible hierarchy with coloured notebooks and free-form tagging
 - **Pin & Trash** — Star important notes; soft-delete with full restore support
 - **Tasks View** — Aggregated checklist across all notes; toggle task completion inline

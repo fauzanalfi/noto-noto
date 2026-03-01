@@ -42,7 +42,7 @@ export default function App() {
   const [activeTag, setActiveTag] = useState(null);
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('split');
+  const [viewMode, setViewMode] = useState('split-horizontal');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [zenMode, setZenMode] = useState(false);
@@ -192,7 +192,16 @@ export default function App() {
     : null;
 
   const isMobile = windowWidth <= 768;
-  const effectiveViewMode = isMobile && viewMode === 'split' ? 'edit' : viewMode;
+  const normalizedViewMode =
+    viewMode === 'split'
+      ? 'split-horizontal'
+      : ['edit', 'split-horizontal', 'split-vertical', 'preview'].includes(viewMode)
+      ? viewMode
+      : 'edit';
+  const effectiveViewMode = normalizedViewMode;
+  const showEditorPane = effectiveViewMode === 'edit' || effectiveViewMode === 'split-horizontal' || effectiveViewMode === 'split-vertical';
+  const showPreviewPane = effectiveViewMode === 'preview' || effectiveViewMode === 'split-horizontal' || effectiveViewMode === 'split-vertical';
+  const splitOrientation = effectiveViewMode === 'split-vertical' ? 'vertical' : 'horizontal';
 
   const handleSignIn = async () => {
     try {
@@ -261,7 +270,7 @@ export default function App() {
           <h1>{showEditor && activeNote ? (activeNote.title || 'Untitled') : listTitle}</h1>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <div className={`workspace-panels ${activeView === 'kanban' ? 'kanban-panels' : ''}`}>
           {activeView === 'tasks' ? (
             <div style={{ flex: 1, overflow: 'auto', padding: 'var(--space-xl)' }}>
               <h2 style={{ marginBottom: 'var(--space-lg)', fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>Tasks</h2>
@@ -273,22 +282,20 @@ export default function App() {
             </div>
           ) : (
           <>
-          <div className={`${showEditor ? 'notes-list-panel hidden' : ''}`}
-               style={showEditor ? { display: undefined } : {}}>
-            <NotesList
-              notes={filteredNotes}
-              activeNoteId={activeNoteId}
-              onSelectNote={handleSelectNote}
-              onCreateNote={handleCreateNote}
-              onUpdateNote={updateNote}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              title={listTitle}
-              forcedBoardView={activeView === 'kanban'}
-              isTrash={activeView === 'trash'}
-              onEmptyTrash={emptyTrash}
-            />
-          </div>
+          <NotesList
+            className={showEditor ? 'hidden' : ''}
+            notes={filteredNotes}
+            activeNoteId={activeNoteId}
+            onSelectNote={handleSelectNote}
+            onCreateNote={handleCreateNote}
+            onUpdateNote={updateNote}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            title={listTitle}
+            forcedBoardView={activeView === 'kanban'}
+            isTrash={activeView === 'trash'}
+            onEmptyTrash={emptyTrash}
+          />
 
           {activeNote ? (
             <div className={`editor-panel ${!showEditor ? 'hidden' : ''}`}
@@ -331,12 +338,14 @@ export default function App() {
                 onRemoveTag={handleRemoveTag}
               />
 
-              <div className="editor-content">
-                {(effectiveViewMode === 'edit' || effectiveViewMode === 'split') && (
+              <div className={`editor-content ${effectiveViewMode}`}>
+                {showEditorPane && (
                   <Editor note={activeNote} onUpdateNote={updateNote} notes={notes} onNavigateNote={handleSelectNote} />
                 )}
-                {effectiveViewMode === 'split' && <div className="split-divider" />}
-                {(effectiveViewMode === 'preview' || effectiveViewMode === 'split') && (
+                {(effectiveViewMode === 'split-horizontal' || effectiveViewMode === 'split-vertical') && (
+                  <div className={`split-divider ${splitOrientation}`} />
+                )}
+                {showPreviewPane && (
                   <Preview content={activeNote.content} notes={notes} onNavigateNote={handleSelectNote} />
                 )}
               </div>

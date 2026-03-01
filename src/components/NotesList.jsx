@@ -10,6 +10,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function NotesList({
+  className = '',
   notes,
   activeNoteId,
   onSelectNote,
@@ -35,7 +36,7 @@ export default function NotesList({
   }, [notes, sortBy]);
 
   return (
-    <div className="notes-list-panel" style={{ position: 'relative' }}>
+    <div className={`notes-list-panel ${className}`.trim()} style={{ position: 'relative' }}>
       {/* Header */}
       <div className="notes-list-header">
         <h2>{title || 'All Notes'}</h2>
