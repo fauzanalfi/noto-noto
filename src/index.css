@@ -1391,6 +1391,9 @@ body {
 
   /* Mobile back button — visible and prominent */
   .mobile-back-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
     color: var(--accent-primary) !important;
     margin-right: var(--space-xs);
     flex-shrink: 0;

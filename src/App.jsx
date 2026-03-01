@@ -323,6 +323,7 @@ export default function App() {
                 onToggleZenMode={setZenMode}
                 viewMode={effectiveViewMode}
                 onViewModeChange={setViewMode}
+                onBackToList={handleBackToList}
               />
 
               <input
