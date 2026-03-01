@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import {
-  BookOpen, Trash2, RotateCcw, Copy,
+  BookOpen, Trash2, RotateCcw, Copy, ArrowLeft,
   ChevronDown, Pin, Maximize2, Minimize2,
   Edit3, Eye, Columns, Rows3, X,
 } from 'lucide-react';
@@ -31,6 +31,7 @@ export default function NoteToolbar({
   onToggleZenMode,
   viewMode,
   onViewModeChange,
+  onBackToList,
 }) {
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [moveMenuPos, setMoveMenuPos] = useState({ top: 0, left: 0 });
@@ -52,9 +53,11 @@ export default function NoteToolbar({
         {isMobile && (
           <button
             className="toolbar-btn mobile-back-btn"
+            onClick={onBackToList}
             title="Back to notes"
+            aria-label="Back to notes list"
           >
-            <BookOpen size={18} />
+            <ArrowLeft size={18} />
           </button>
         )}
 
