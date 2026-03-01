@@ -9,7 +9,7 @@ const features = [
   {
     icon: Zap,
     title: 'Markdown Editor',
-    desc: 'Full-featured editor with live split preview.',
+    desc: 'Full-featured editor with horizontal and vertical split preview.',
   },
   {
     icon: RefreshCw,
