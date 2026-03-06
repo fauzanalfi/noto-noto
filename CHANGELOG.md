@@ -2,6 +2,40 @@
 
 All notable changes to this project are documented in this file.
 
+## v2.0.0 - 2026-03-06
+
+### Added
+
+- **Design system** — Fully documented W3C DTCG token set covering colour (dark/light/eyecare themes), typography, spacing, motion, elevation, and grid; maintained in `docs/design-system/`.
+- **Onboarding flow** (`src/components/Onboarding.jsx`) — 3-step first-run modal: Welcome, Create your first notebook (with PARA category picker), and Quick Switcher intro. Completion state persisted in `localStorage('noto-onboarded')`.
+- **Settings modal** (`src/components/Settings.jsx`) — 2-pane overlay with four sections: Account (avatar, email, sign-out), Appearance (theme picker), Editor (auto-save info, font details), and About (version, full keyboard shortcuts table).
+- **Mobile bottom tab bar** — Persistent `<nav role="tablist">` on small screens with tabs for Notes, Kanban, Tasks, and Settings; replaces reliance on the sidebar for primary mobile navigation.
+- **Expanded keyboard shortcuts** — `⌘1`–`⌘4` to switch view modes and toggle Zen mode; `⌘S` flashes a saved confirmation; `⌘F` focuses the search box; `Esc` dismisses overlays in priority order (Quick Switcher → Settings → Zen mode).
+- **Save indicator accessibility** — `role="status"`, `aria-live="polite"`, and `aria-atomic="true"` on the save indicator; `.saved` and `.error` CSS state variants.
+- **New animation keyframes** — `modalIn` (scale 0.96 → 1), `quickSwitcherIn` (fade + translateY -8px), `loginCardIn`, `tagIn`, `cardDropSpring`.
+
+### Changed
+
+- **Login screen** — Complete redesign from two-panel hero layout to a single centred card with wordmark (`noto.`), tagline, and ambient background blobs.
+- **Layout tokens** — Sidebar width 260 px → 240 px; notes list width 320 px → 300 px; toolbar height 48 px → 44 px.
+- **Quick Switcher** — Position changed to `top: 20vh`; width set to `min(560px, 90vw)`; now uses `quickSwitcherIn` spring animation on open.
+- **Modal animation** — Upgraded from plain `slideUp` to `modalIn` (scale + fade) across all modal overlays.
+- **Sidebar footer** — Sign-out button replaced by a gear icon that opens the new Settings modal; sign-out moved inside Settings → Account.
+- **Toolbar view mode buttons** — Titles updated to include keyboard hints, e.g. `"Edit only (⌘1)"`.
+- **Inter font** — Weight range extended to include `800` for display headings.
+- **Page title** — Updated to "Noto 2.0 — Your Second Brain".
+- **Kanban** — Column width changed to `min(280px, 85vw)`; card background set to `--bg-primary`; dragging card applies `scale(1.02)` lift.
+- **Zen mode** — Editor constrained to `max-width: 720px` centred; chrome elements fade when cursor is idle.
+- **Tag pill** — Entrance animated with `tagIn` (200 ms).
+
+### Quality
+
+- Verified lint passes (`npm run lint`).
+- Verified build passes (`npm run build`).
+- Deployed to Vercel (`vercel --prod`).
+
+---
+
 ## v1.0.1 - 2026-03-01
 
 ### Added
