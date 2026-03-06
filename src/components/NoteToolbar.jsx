@@ -136,7 +136,12 @@ export default function NoteToolbar({
         )}
 
         {saveStatus && (
-          <span className="save-indicator">
+          <span
+            className={`save-indicator${saveStatus === 'saved' ? ' saved' : saveStatus === 'error' ? ' error' : ''}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'error' ? 'Save failed' : 'Saved ✓'}
           </span>
         )}
@@ -184,14 +189,16 @@ export default function NoteToolbar({
           <button
             className={`view-mode-btn ${viewMode === 'edit' ? 'active' : ''}`}
             onClick={() => onViewModeChange('edit')}
-            title="Edit only"
+            title="Edit only (⌘1)"
+            aria-label="Edit mode"
           >
             <Edit3 className="icon" size={14} />
           </button>
           <button
             className={`view-mode-btn ${viewMode === 'split-horizontal' ? 'active' : ''}`}
             onClick={() => onViewModeChange('split-horizontal')}
-            title="Split horizontal (left/right)"
+            title="Split horizontal (⌘3)"
+            aria-label="Split horizontal view"
           >
             <Columns className="icon" size={14} />
           </button>
@@ -199,13 +206,15 @@ export default function NoteToolbar({
             className={`view-mode-btn ${viewMode === 'split-vertical' ? 'active' : ''}`}
             onClick={() => onViewModeChange('split-vertical')}
             title="Split vertical (top/bottom)"
+            aria-label="Split vertical view"
           >
             <Rows3 className="icon" size={14} />
           </button>
           <button
             className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
             onClick={() => onViewModeChange('preview')}
-            title="Preview only"
+            title="Preview only (⌘2)"
+            aria-label="Preview mode"
           >
             <Eye className="icon" size={14} />
           </button>

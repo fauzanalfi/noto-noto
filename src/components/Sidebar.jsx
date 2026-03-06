@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   BookOpen, Compass, Rocket, Archive, FileText,
   Pin, Trash2, Plus, ChevronDown, ChevronRight,
-  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox, CheckSquare, LayoutGrid
+  Edit3, X, Tag, Sun, Moon, Glasses, FolderInput, Inbox, CheckSquare, LayoutGrid, Settings
 } from 'lucide-react';
 import { DEFAULT_PARA_CATEGORIES } from '../utils';
 
@@ -44,6 +44,7 @@ export default function Sidebar({
   onThemeChange,
   user,
   onSignOut,
+  onOpenSettings,
 }) {
   const [expandedCategories, setExpandedCategories] = useState({
     projects: true,
@@ -340,15 +341,12 @@ export default function Sidebar({
               {user.displayName || user.email}
             </span>
             <button
-              onClick={onSignOut}
-              title="Sign out"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '4px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+              onClick={onOpenSettings}
+              title="Settings"
+              aria-label="Open settings"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: '4px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', flexShrink: 0, transition: 'all var(--transition-fast)' }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
+              <Settings size={14} />
             </button>
           </div>
         )}

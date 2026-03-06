@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Menu, ArrowLeft } from 'lucide-react';
+import { Menu, ArrowLeft, FileText, LayoutGrid, CheckSquare, Settings as SettingsIcon } from 'lucide-react';
 import { useNotes } from './hooks/useNotes';
 import { useNotebooks } from './hooks/useNotebooks';
 import { useTheme } from './hooks/useTheme';
@@ -15,6 +15,8 @@ import LoginScreen from './components/LoginScreen';
 import NoteToolbar from './components/NoteToolbar';
 import TagManager from './components/TagManager';
 import TasksView from './components/TasksView';
+import Onboarding from './components/Onboarding';
+import Settings from './components/Settings';
 import {
   exportNoteAsMarkdown,
   exportAllNotesAsMarkdownZip,
@@ -47,6 +49,8 @@ export default function App() {
   const [showEditor, setShowEditor] = useState(false);
   const [zenMode, setZenMode] = useState(false);
   const [showQuickSwitcher, setShowQuickSwitcher] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [saveStatus, setSaveStatus] = useState(null);
 
@@ -148,21 +152,65 @@ export default function App() {
 
   useEffect(() => {
     const handler = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      const mod = e.ctrlKey || e.metaKey;
+
+      // Quick Switcher
+      if (mod && e.key === 'k') {
         e.preventDefault();
         setShowQuickSwitcher((v) => !v);
+        return;
       }
-      if (e.key === 'Escape') setShowQuickSwitcher(false);
+
+      // Force save (⌘S)
+      if (mod && e.key === 's') {
+        e.preventDefault();
+        // Save is automatic; just flash the indicator
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus(null), 1500);
+        return;
+      }
+
+      // Focus search (⌘F / Ctrl+F) — dispatch a custom event the NotesList can listen to
+      if (mod && e.key === 'f') {
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent('noto:focus-search'));
+        return;
+      }
+
+      // View mode shortcuts (⌘1-4) — only when not in modal/input
+      const tag = document.activeElement?.tagName;
+      const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
+      if (mod && !inInput) {
+        if (e.key === '1') { e.preventDefault(); setViewMode('edit'); }
+        if (e.key === '2') { e.preventDefault(); setViewMode('preview'); }
+        if (e.key === '3') { e.preventDefault(); setViewMode('split-horizontal'); }
+        if (e.key === '4') { e.preventDefault(); setZenMode((v) => !v); }
+      }
+
+      // Escape
+      if (e.key === 'Escape') {
+        if (showQuickSwitcher) { setShowQuickSwitcher(false); return; }
+        if (showSettings)      { setShowSettings(false);      return; }
+        if (showOnboarding)    return; // don't dismiss onboarding with Esc
+        if (zenMode)           { setZenMode(false);           return; }
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [showQuickSwitcher, showSettings, showOnboarding, zenMode]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Trigger onboarding for first-time users
+  useEffect(() => {
+    if (user && !localStorage.getItem('noto-onboarded')) {
+      setShowOnboarding(true);
+    }
+  }, [user]);
 
   const prevSavingRef = useRef(saving);
   useEffect(() => {
@@ -249,6 +297,7 @@ export default function App() {
         onThemeChange={setTheme}
         user={user}
         onSignOut={signOut}
+        onOpenSettings={() => setShowSettings(true)}
       />
 
       <div
@@ -359,6 +408,49 @@ export default function App() {
         </div>
       </div>
 
+      {/* Mobile bottom tab bar */}
+      <nav className="mobile-tab-bar" role="tablist" aria-label="Main navigation">
+        <button
+          className={`mobile-tab-item ${['all','pinned','tag','notebook'].includes(activeView) ? 'active' : ''}`}
+          onClick={() => { setActiveView('all'); setSearchQuery(''); }}
+          role="tab"
+          aria-selected={['all','pinned','tag','notebook'].includes(activeView)}
+          aria-label="Notes"
+        >
+          <FileText size={22} aria-hidden="true" />
+          <span>Notes</span>
+        </button>
+        <button
+          className={`mobile-tab-item ${activeView === 'kanban' ? 'active' : ''}`}
+          onClick={() => { setActiveView('kanban'); setSearchQuery(''); }}
+          role="tab"
+          aria-selected={activeView === 'kanban'}
+          aria-label="Kanban"
+        >
+          <LayoutGrid size={22} aria-hidden="true" />
+          <span>Kanban</span>
+        </button>
+        <button
+          className={`mobile-tab-item ${activeView === 'tasks' ? 'active' : ''}`}
+          onClick={() => { setActiveView('tasks'); setSearchQuery(''); }}
+          role="tab"
+          aria-selected={activeView === 'tasks'}
+          aria-label="Tasks"
+        >
+          <CheckSquare size={22} aria-hidden="true" />
+          <span>Tasks</span>
+        </button>
+        <button
+          className="mobile-tab-item"
+          onClick={() => setShowSettings(true)}
+          role="tab"
+          aria-label="Settings"
+        >
+          <SettingsIcon size={22} aria-hidden="true" />
+          <span>Settings</span>
+        </button>
+      </nav>
+
       {showQuickSwitcher && (
         <QuickSwitcher
           notes={notes}
@@ -368,6 +460,23 @@ export default function App() {
             setShowEditor(true);
           }}
           onClose={() => setShowQuickSwitcher(false)}
+        />
+      )}
+
+      {showSettings && (
+        <Settings
+          onClose={() => setShowSettings(false)}
+          theme={theme}
+          onThemeChange={setTheme}
+          user={user}
+          onSignOut={signOut}
+        />
+      )}
+
+      {showOnboarding && (
+        <Onboarding
+          onComplete={() => setShowOnboarding(false)}
+          onCreateNotebook={createNotebook}
         />
       )}
     </div>
