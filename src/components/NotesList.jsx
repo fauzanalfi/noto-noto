@@ -96,9 +96,9 @@ export default function NotesList({
             onClick={onEmptyTrash}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              width: '100%', padding: '6px 10px', border: '1px solid #ef4444',
+              width: '100%', padding: '6px 10px', border: '1px solid var(--color-danger)',
               borderRadius: 'var(--radius-sm)', background: 'transparent',
-              color: '#ef4444', cursor: 'pointer', fontSize: 'var(--font-size-xs)',
+              color: 'var(--color-danger)', cursor: 'pointer', fontSize: 'var(--font-size-xs)',
               fontFamily: 'var(--font-sans)', fontWeight: 500,
             }}
           >

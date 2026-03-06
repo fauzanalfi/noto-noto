@@ -119,7 +119,7 @@ export default function NoteToolbar({
               }}
               title="Delete permanently"
               aria-label="Delete note permanently"
-              style={{ color: '#ef4444' }}
+              style={{ color: 'var(--color-danger)' }}
             >
               <Trash2 size={16} aria-hidden="true" />
             </button>
