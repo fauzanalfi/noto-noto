@@ -2,10 +2,11 @@
 
   <img src="public/favicon.svg" alt="Noto Logo" width="72" />
 
-  <h1>Noto</h1>
-  <p><strong>A fast, Markdown-first note-taking app built around the PARA method.</strong></p>
+  <h1>Noto 2.0</h1>
+  <p><strong>Your second brain, beautifully organised.</strong></p>
 
-  [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-222?style=flat-square&logo=github)](https://fauzanalfi.github.io/noto-noto)
+  [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000?style=flat-square&logo=vercel)](https://fauzanalfi.github.io/noto-noto)
+  [![Version](https://img.shields.io/badge/version-2.0.0-blueviolet?style=flat-square)](CHANGELOG.md)
   [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev)
   [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
   [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
@@ -17,21 +18,31 @@
 
 ## ✨ Features
 
+### Core
 - **PARA Method + Inbox** — Organise notes into Inbox (holding area), Projects, Areas, Resources & Archive
 - **Markdown Editor** — Full toolbar with Bold, Italic, Headings, Lists, Code, Links, and more; syntax-highlighted preview
-- **Flexible Split Preview** — Edit with left/right or top/bottom split preview
-- **Notebooks & Tags** — Flexible hierarchy with coloured notebooks and free-form tagging
+- **Flexible Split Preview** — Edit with left/right or top/bottom split preview, or preview-only mode
+- **Notebooks & Tags** — Flexible hierarchy with coloured notebooks and free-form tagging (with `tagIn` enter animation)
 - **Pin & Trash** — Star important notes; soft-delete with full restore support
 - **Tasks View** — Aggregated checklist across all notes; toggle task completion inline
-- **Kanban Board** — Board view with Backlog / In Progress / Done columns and drag-and-drop
-- **Quick Switcher** — `Ctrl/Cmd+K` to jump to any note instantly
-- **Zen Mode** — Distraction-free full-screen writing
+- **Kanban Board** — Board view with Backlog / In Progress / Done columns and drag-and-drop (card lift on drag)
+- **Quick Switcher** — `⌘K` / `Ctrl+K` to jump to any note instantly
+- **Zen Mode** — Distraction-free writing with a 720 px centred editor and chrome that fades on idle
 - **Real-time Sync** — Powered by Firebase Firestore; all devices stay in sync
 - **Three Themes** — Dark, Light, and Eye Care (warm sepia)
 - **PWA Ready** — Installable on desktop and mobile, works offline-aware
 - **Export** — Export notes as `.md`, `.md zip` (current list or all notes), or full JSON backup
-- **Demo Mode** — Runs without Firebase credentials using localStorage (used on GitHub Pages demo)
+- **Demo Mode** — Runs without Firebase credentials using localStorage (used on demo deployment)
 - **Google Auth** — Secure sign-in; notes are private to each account
+
+### New in 2.0
+- **Onboarding flow** — First-run 3-step modal (Welcome → Create your first notebook with PARA category → Quick Switcher tip)
+- **Settings modal** — 2-pane overlay covering Account, Appearance, Editor, and About (keyboard shortcuts reference)
+- **Mobile bottom tab bar** — Native-feeling tab bar on small screens for Notes, Kanban, Tasks, and Settings
+- **Expanded keyboard shortcuts** — `⌘1`–`⌘4` switch view modes and toggle Zen; `⌘S` flashes a saved confirmation; `⌘F` focuses the search box; `Esc` dismisses overlays in priority order
+- **Refreshed login screen** — Single centred card with wordmark and tagline (replaces the old two-panel hero layout)
+- **Design system** — Fully documented token set (colours, spacing, typography, motion) across 3 themes; see [`docs/design-system/`](docs/design-system/)
+- **Micro-interactions** — Button press scale, card lift on drag, `modalIn` / `quickSwitcherIn` spring animations throughout
 
 ## 🖼️ Screenshots
 
@@ -59,12 +70,13 @@
 | Layer | Technology |
 |---|---|
 | Frontend | React 19, Vite 7 |
-| Styling | Plain CSS (custom design system) |
+| Styling | Plain CSS with W3C DTCG design tokens |
 | Icons | Lucide React |
 | Auth | Firebase Authentication (Google) |
 | Database | Firebase Firestore |
 | Markdown | `marked` + `DOMPurify` |
 | Syntax Highlighting | `highlight.js` |
+| Fonts | Inter (UI), JetBrains Mono (code) |
 | Deployment | Vercel |
 
 ## 🚀 Getting Started
@@ -141,15 +153,31 @@ service cloud.firestore {
 
 ```
 noto-noto/
+├── docs/
+│   ├── design-system/  # Full design system documentation & tokens
+│   │   ├── 01-foundations/   # Colour, typography, spacing, motion, grid
+│   │   ├── 02-tokens/        # tokens.json (W3C DTCG format)
+│   │   ├── 03-components/    # Per-component specs
+│   │   ├── 04-patterns/      # Layout & interaction patterns
+│   │   └── 05-dev-guide/     # Theming, accessibility, setup notes
+│   └── APP_DOCUMENTATION.md
 ├── public/             # Static assets, favicon, PWA manifest
 ├── src/
-│   ├── components/     # UI components (Editor, Sidebar, NotesList, …)
-│   ├── hooks/          # Custom React hooks (useNotes, useNoteActions, useAuth, …)
-│   ├── assets/         # Images and SVGs
-│   ├── test/           # Test setup files
-│   ├── App.jsx         # Root layout and state
+│   ├── components/
+│   │   ├── Editor.jsx
+│   │   ├── LoginScreen.jsx   # Noto 2.0 centred-card login
+│   │   ├── NotesList.jsx
+│   │   ├── NoteToolbar.jsx
+│   │   ├── Onboarding.jsx    # 3-step first-run modal (new in 2.0)
+│   │   ├── Settings.jsx      # 2-pane settings overlay (new in 2.0)
+│   │   ├── Sidebar.jsx
+│   │   └── …
+│   ├── hooks/          # useNotes, useNoteActions, useAuth, useTheme, …
+│   ├── assets/
+│   ├── test/
+│   ├── App.jsx         # Root layout, global keyboard shortcuts, mobile tab bar
 │   ├── firebase.js     # Firebase initialisation
-│   ├── index.css       # Global design system & styles
+│   ├── index.css       # Design tokens + all component styles
 │   └── utils.js        # Helper functions
 ├── .env                # Local environment variables (gitignored)
 ├── vite.config.js
@@ -159,8 +187,23 @@ noto-noto/
 ## 📚 Documentation
 
 - [App Documentation](docs/APP_DOCUMENTATION.md) — architecture, data model, hooks, and operational notes
+- [Design System](docs/design-system/index.md) — tokens, component specs, patterns, and theming guide
 - [Deployment Guide](DEPLOYMENT.md) — hosting and deployment options
 - [Changelog](CHANGELOG.md) — recent project updates
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `⌘K` / `Ctrl+K` | Open Quick Switcher |
+| `⌘N` / `Ctrl+N` | New note |
+| `⌘S` / `Ctrl+S` | Flash saved confirmation |
+| `⌘F` / `Ctrl+F` | Focus search box |
+| `⌘1` / `Ctrl+1` | Edit-only view |
+| `⌘2` / `Ctrl+2` | Preview-only view |
+| `⌘3` / `Ctrl+3` | Split horizontal view |
+| `⌘4` / `Ctrl+4` | Toggle Zen mode |
+| `Esc` | Dismiss Quick Switcher → Settings → Zen mode |
 
 ## 🌐 Community & Governance
 
