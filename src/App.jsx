@@ -37,7 +37,7 @@ export default function App() {
     deleteNotebook,
     moveNotebookCategory,
   } = useNotebooks(user?.uid);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, neumorphismEnabled, setNeumorphismEnabled } = useTheme();
 
   const [activeView, setActiveView] = useState('all');
   const [activeNotebookId, setActiveNotebookId] = useState(null);
@@ -55,6 +55,7 @@ export default function App() {
   const [saveStatus, setSaveStatus] = useState(null);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const shouldShowOnboarding = showOnboarding || Boolean(user && !localStorage.getItem('noto-onboarded'));
 
   const filteredNotes = useMemo(() => {
     const filters = { search: debouncedSearchQuery };
@@ -191,26 +192,19 @@ export default function App() {
       if (e.key === 'Escape') {
         if (showQuickSwitcher) { setShowQuickSwitcher(false); return; }
         if (showSettings)      { setShowSettings(false);      return; }
-        if (showOnboarding)    return; // don't dismiss onboarding with Esc
+        if (shouldShowOnboarding) return; // don't dismiss onboarding with Esc
         if (zenMode)           { setZenMode(false);           return; }
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [showQuickSwitcher, showSettings, showOnboarding, zenMode]);
+  }, [showQuickSwitcher, showSettings, shouldShowOnboarding, zenMode]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Trigger onboarding for first-time users
-  useEffect(() => {
-    if (user && !localStorage.getItem('noto-onboarded')) {
-      setShowOnboarding(true);
-    }
-  }, [user]);
 
   const prevSavingRef = useRef(saving);
   useEffect(() => {
@@ -296,7 +290,6 @@ export default function App() {
         theme={theme}
         onThemeChange={setTheme}
         user={user}
-        onSignOut={signOut}
         onOpenSettings={() => setShowSettings(true)}
       />
 
@@ -468,12 +461,14 @@ export default function App() {
           onClose={() => setShowSettings(false)}
           theme={theme}
           onThemeChange={setTheme}
+          neumorphismEnabled={neumorphismEnabled}
+          onNeumorphismChange={setNeumorphismEnabled}
           user={user}
           onSignOut={signOut}
         />
       )}
 
-      {showOnboarding && (
+      {shouldShowOnboarding && (
         <Onboarding
           onComplete={() => setShowOnboarding(false)}
           onCreateNotebook={createNotebook}

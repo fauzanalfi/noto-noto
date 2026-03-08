@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { createElement, useState } from 'react';
 import { X, User, Palette, Type, Info } from 'lucide-react';
 
 const THEME_OPTIONS = [
@@ -14,7 +14,15 @@ const NAV_ITEMS = [
   { id: 'about',      icon: Info,    label: 'About' },
 ];
 
-export default function Settings({ onClose, theme, onThemeChange, user, onSignOut }) {
+export default function Settings({
+  onClose,
+  theme,
+  onThemeChange,
+  neumorphismEnabled,
+  onNeumorphismChange,
+  user,
+  onSignOut,
+}) {
   const [activeSection, setActiveSection] = useState('appearance');
 
   const handleSignOut = () => {
@@ -48,14 +56,14 @@ export default function Settings({ onClose, theme, onThemeChange, user, onSignOu
         <div className="settings-body">
           {/* Left nav */}
           <nav className="settings-sidebar" aria-label="Settings sections">
-            {NAV_ITEMS.map(({ id, icon: Icon, label }) => (
+            {NAV_ITEMS.map(({ id, icon, label }) => (
               <button
                 key={id}
                 className={`settings-nav-item ${activeSection === id ? 'active' : ''}`}
                 onClick={() => setActiveSection(id)}
                 aria-current={activeSection === id ? 'page' : undefined}
               >
-                <Icon size={15} aria-hidden="true" />
+                {createElement(icon, { size: 15, 'aria-hidden': 'true' })}
                 {label}
               </button>
             ))}
@@ -114,6 +122,25 @@ export default function Settings({ onClose, theme, onThemeChange, user, onSignOu
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div className="settings-row">
+                  <div>
+                    <div className="settings-label">
+                      Neumorphism <span className="settings-beta-pill">Beta</span>
+                    </div>
+                    <div className="settings-hint">Enable depth-heavy shadows and inset surfaces.</div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={neumorphismEnabled}
+                    aria-label="Toggle Neumorphism style"
+                    className={`settings-switch ${neumorphismEnabled ? 'on' : ''}`}
+                    onClick={() => onNeumorphismChange(!neumorphismEnabled)}
+                  >
+                    <span className="settings-switch-thumb" aria-hidden="true" />
+                  </button>
                 </div>
               </div>
             )}

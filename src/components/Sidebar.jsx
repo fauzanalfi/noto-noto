@@ -43,7 +43,6 @@ export default function Sidebar({
   theme,
   onThemeChange,
   user,
-  onSignOut,
   onOpenSettings,
 }) {
   const [expandedCategories, setExpandedCategories] = useState({

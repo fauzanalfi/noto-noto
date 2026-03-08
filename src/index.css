@@ -239,6 +239,21 @@
   color-scheme: light;
 }
 
+/* --- NEUMORPHISM MODE TOGGLE --- */
+:root[data-neumorphism='off'] {
+  --neuo-light: transparent;
+  --neuo-dark: transparent;
+  --neuo-raised-sm: 0 1px 2px var(--border-subtle);
+  --neuo-raised-md: 0 4px 10px var(--border-subtle);
+  --neuo-raised-lg: 0 10px 24px var(--border-subtle);
+  --neuo-inset-sm: inset 0 0 0 1px var(--border-default);
+  --neuo-inset-md: inset 0 0 0 2px var(--border-default);
+  --shadow-sm: 0 1px 2px var(--border-subtle);
+  --shadow-md: 0 4px 10px var(--border-subtle);
+  --shadow-lg: 0 10px 24px var(--border-subtle);
+  --shadow-xl: 0 18px 40px var(--border-subtle);
+}
+
 /* --- Reset & Base --- */
 *,
 *::before,
@@ -2687,6 +2702,53 @@ body {
   margin-top: 2px;
 }
 
+.settings-beta-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-xs);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+  border: 1px solid var(--border-default);
+}
+
+.settings-switch {
+  width: 44px;
+  height: 26px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  box-shadow: var(--neuo-inset-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.settings-switch.on {
+  background: color-mix(in srgb, var(--accent-primary) 28%, var(--bg-tertiary));
+}
+
+.settings-switch-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  box-shadow: var(--neuo-raised-sm);
+  transform: translateX(0);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.settings-switch.on .settings-switch-thumb {
+  transform: translateX(18px);
+}
+
 /* Theme radio group */
 .theme-options {
   display: flex;
@@ -2827,6 +2889,11 @@ body {
 }
 
 .theme-option:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.settings-switch:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
