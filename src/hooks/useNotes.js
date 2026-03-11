@@ -1,11 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import {
-  collection, doc, onSnapshot, query, orderBy,
-} from 'firebase/firestore';
-import { db } from '../firebase';
-import { generateId, WELCOME_NOTE_CONTENT } from '../utils';
-import { useNoteActions } from './useNoteActions';
-import { isDemoMode } from '../runtime';
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { generateId, WELCOME_NOTE_CONTENT } from "../utils";
+import { useNoteActions } from "./useNoteActions";
+import { isDemoMode } from "../runtime";
 
 const demoNotesKey = (userId) => `noto-demo-notes-${userId}`;
 
@@ -13,10 +17,10 @@ function makeWelcomeNote() {
   const now = new Date().toISOString();
   return {
     id: generateId(),
-    title: 'Welcome to Noto!',
+    title: "Welcome to Noto!",
     content: WELCOME_NOTE_CONTENT,
-    notebookId: 'resources',
-    tags: ['welcome', 'getting-started'],
+    notebookId: "resources",
+    tags: ["welcome", "getting-started"],
     createdAt: now,
     updatedAt: now,
     pinned: true,
@@ -24,8 +28,12 @@ function makeWelcomeNote() {
   };
 }
 
-function notesRef(userId) { return collection(db, 'users', userId, 'notes'); }
-function noteRef(userId, noteId) { return doc(db, 'users', userId, 'notes', noteId); }
+function notesRef(userId) {
+  return collection(db, "users", userId, "notes");
+}
+function noteRef(userId, noteId) {
+  return doc(db, "users", userId, "notes", noteId);
+}
 
 export function useNotes(userId) {
   const [notes, setNotes] = useState([]);
@@ -38,7 +46,7 @@ export function useNotes(userId) {
   const hasSeededWelcomeRef = useRef(false);
 
   const trackWrite = useCallback((promise, options = {}) => {
-    const { message = 'Failed to save note changes.', onError } = options;
+    const { message = "Failed to save note changes.", onError } = options;
     pendingRef.current += 1;
     setSaving(true);
     setError(null);
@@ -58,9 +66,10 @@ export function useNotes(userId) {
     latestUpdateTokenRef.current[id] = token;
   }, []);
 
-  const isLatestUpdateToken = useCallback((id, token) => (
-    latestUpdateTokenRef.current[id] === token
-  ), []);
+  const isLatestUpdateToken = useCallback(
+    (id, token) => latestUpdateTokenRef.current[id] === token,
+    [],
+  );
 
   const setUpdateTimer = useCallback((id, timerId) => {
     updateTimers.current[id] = timerId;
@@ -117,7 +126,9 @@ export function useNotes(userId) {
   });
 
   useEffect(() => {
-    Object.values(updateTimers.current).forEach((timerId) => clearTimeout(timerId));
+    Object.values(updateTimers.current).forEach((timerId) =>
+      clearTimeout(timerId),
+    );
     updateTimers.current = {};
     latestUpdateTokenRef.current = {};
 
@@ -139,7 +150,9 @@ export function useNotes(userId) {
 
         let existingNotes = [];
         try {
-          existingNotes = JSON.parse(localStorage.getItem(demoNotesKey(userId)) || '[]');
+          existingNotes = JSON.parse(
+            localStorage.getItem(demoNotesKey(userId)) || "[]",
+          );
         } catch {
           existingNotes = [];
         }
@@ -155,7 +168,9 @@ export function useNotes(userId) {
 
       return () => {
         clearTimeout(startSyncTimer);
-        Object.values(updateTimers.current).forEach((timerId) => clearTimeout(timerId));
+        Object.values(updateTimers.current).forEach((timerId) =>
+          clearTimeout(timerId),
+        );
         updateTimers.current = {};
       };
     }
@@ -165,7 +180,7 @@ export function useNotes(userId) {
       setError(null);
     }, 0);
 
-    const notesQuery = query(notesRef(userId), orderBy('updatedAt', 'desc'));
+    const notesQuery = query(notesRef(userId), orderBy("updatedAt", "desc"));
     const unsubscribe = onSnapshot(
       notesQuery,
       (snap) => {
@@ -184,16 +199,18 @@ export function useNotes(userId) {
         setLoading(false);
       },
       (snapshotError) => {
-        setError('Failed to sync notes. Please refresh and try again.');
+        setError("Failed to sync notes. Please refresh and try again.");
         setLoading(false);
         console.error(snapshotError);
-      }
+      },
     );
 
     return () => {
       clearTimeout(startSyncTimer);
       unsubscribe();
-      Object.values(updateTimers.current).forEach((timerId) => clearTimeout(timerId));
+      Object.values(updateTimers.current).forEach((timerId) =>
+        clearTimeout(timerId),
+      );
       updateTimers.current = {};
     };
   }, [userId, seedWelcomeNote]);
@@ -203,12 +220,18 @@ export function useNotes(userId) {
     try {
       localStorage.setItem(demoNotesKey(userId), JSON.stringify(notes));
     } catch {
-      console.error('Failed to save local demo notes.');
+      console.error("Failed to save local demo notes.");
     }
   }, [notes, userId, loading]);
 
-  // Get all unique tags
-  const allTags = [...new Set(notes.filter((n) => !n.trashed).flatMap((n) => n.tags))].sort();
+  // Get all unique tags — memoized so it only recalculates when notes change
+  const allTags = useMemo(
+    () =>
+      [
+        ...new Set(notes.filter((n) => !n.trashed).flatMap((n) => n.tags)),
+      ].sort(),
+    [notes],
+  );
 
   // Get notes filtered
   const getFilteredNotes = useCallback(
@@ -221,7 +244,7 @@ export function useNotes(userId) {
         filtered = filtered.filter((n) => !n.trashed);
       }
 
-      if (filters.notebookId && filters.notebookId !== 'all') {
+      if (filters.notebookId && filters.notebookId !== "all") {
         filtered = filtered.filter((n) => n.notebookId === filters.notebookId);
       }
 
@@ -239,7 +262,7 @@ export function useNotes(userId) {
           (n) =>
             n.title.toLowerCase().includes(q) ||
             n.content.toLowerCase().includes(q) ||
-            n.tags.some((t) => t.toLowerCase().includes(q))
+            n.tags.some((t) => t.toLowerCase().includes(q)),
         );
       }
 
@@ -252,7 +275,7 @@ export function useNotes(userId) {
 
       return filtered;
     },
-    [notes]
+    [notes],
   );
 
   return {

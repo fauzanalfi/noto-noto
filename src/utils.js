@@ -1,6 +1,15 @@
-// UUID generator
+// UUID generator — uses the native crypto API which is available in all
+// modern browsers and Node 19+. Falls back to a timestamp+random string
+// for environments where crypto.randomUUID is not yet available.
 export function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp base-36 + random base-36 suffix
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 11);
 }
 
 // Format date relative
@@ -52,7 +61,9 @@ export function extractSnippet(markdown, maxLen = 120) {
     .substring(0, maxLen);
 }
 
-// Debounce function
+// Debounce function — kept as a plain utility for use outside of React
+// (e.g. tests, non-hook contexts). React components should prefer the
+// useDebounce hook in hooks/useDebounce.js instead.
 export function debounce(fn, delay) {
   let timer;
   return (...args) => {
@@ -132,12 +143,12 @@ Create tables with the Table button in the toolbar:
 export function countWords(markdown) {
   if (!markdown) return 0;
   const text = markdown
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`[^`]+`/g, ' ')
-    .replace(/!\[.*?\]\(.*?\)/g, ' ')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[#*_~>|\\-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]+`/g, " ")
+    .replace(/!\[.*?\]\(.*?\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[#*_~>|\\-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   return text ? text.split(/\s+/).length : 0;
 }
@@ -145,13 +156,13 @@ export function countWords(markdown) {
 // Export a single note as a .md file download
 export function exportNoteAsMarkdown(note) {
   const content = note.title
-    ? `# ${note.title}\n\n${note.content || ''}`
-    : (note.content || '');
-  const blob = new Blob([content], { type: 'text/markdown' });
+    ? `# ${note.title}\n\n${note.content || ""}`
+    : note.content || "";
+  const blob = new Blob([content], { type: "text/markdown" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `${(note.title || 'untitled').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+  a.download = `${(note.title || "untitled").replace(/[^a-z0-9]/gi, "-").toLowerCase()}.md`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -160,11 +171,13 @@ export function exportNoteAsMarkdown(note) {
 
 // Export all notes as a JSON backup download
 export function exportAllNotesAsJSON(notes) {
-  const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(notes, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `noto-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `noto-backup-${new Date().toISOString().split("T")[0]}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -172,16 +185,16 @@ export function exportAllNotesAsJSON(notes) {
 }
 
 async function exportNotesAsMarkdownZip(notes, prefix) {
-  const { default: JSZip } = await import('jszip');
+  const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const usedNames = new Set();
 
   const sanitizeFileName = (value) =>
-    (value || 'untitled')
+    (value || "untitled")
       .trim()
-      .replace(/[^a-z0-9]+/gi, '-')
-      .replace(/^-+|-+$/g, '')
-      .toLowerCase() || 'untitled';
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "untitled";
 
   notes.forEach((note, index) => {
     const base = sanitizeFileName(note.title || `note-${index + 1}`);
@@ -196,17 +209,17 @@ async function exportNotesAsMarkdownZip(notes, prefix) {
     usedNames.add(fileName);
 
     const content = note.title
-      ? `# ${note.title}\n\n${note.content || ''}`
-      : (note.content || '');
+      ? `# ${note.title}\n\n${note.content || ""}`
+      : note.content || "";
 
     zip.file(fileName, content);
   });
 
-  const blob = await zip.generateAsync({ type: 'blob' });
+  const blob = await zip.generateAsync({ type: "blob" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `${prefix}-${new Date().toISOString().split('T')[0]}.zip`;
+  a.download = `${prefix}-${new Date().toISOString().split("T")[0]}.zip`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -214,15 +227,16 @@ async function exportNotesAsMarkdownZip(notes, prefix) {
 }
 
 export function exportAllNotesAsMarkdownZip(notes) {
-  return exportNotesAsMarkdownZip(notes, 'noto-markdown-backup');
+  return exportNotesAsMarkdownZip(notes, "noto-markdown-backup");
 }
 
-export function exportCurrentListAsMarkdownZip(notes, listName = 'notes') {
-  const safeListName = (listName || 'notes')
-    .replace(/^#/, '')
-    .replace(/[^a-z0-9]+/gi, '-')
-    .replace(/^-+|-+$/g, '')
-    .toLowerCase() || 'notes';
+export function exportCurrentListAsMarkdownZip(notes, listName = "notes") {
+  const safeListName =
+    (listName || "notes")
+      .replace(/^#/, "")
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "notes";
 
   return exportNotesAsMarkdownZip(notes, `noto-${safeListName}`);
 }
