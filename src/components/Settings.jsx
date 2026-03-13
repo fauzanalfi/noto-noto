@@ -18,8 +18,6 @@ export default function Settings({
   onClose,
   theme,
   onThemeChange,
-  neumorphismEnabled,
-  onNeumorphismChange,
   user,
   onSignOut,
 }) {
@@ -122,25 +120,6 @@ export default function Settings({
                       </button>
                     ))}
                   </div>
-                </div>
-
-                <div className="settings-row">
-                  <div>
-                    <div className="settings-label">
-                      Neumorphism <span className="settings-beta-pill">Beta</span>
-                    </div>
-                    <div className="settings-hint">Enable depth-heavy shadows and inset surfaces.</div>
-                  </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={neumorphismEnabled}
-                    aria-label="Toggle Neumorphism style"
-                    className={`settings-switch ${neumorphismEnabled ? 'on' : ''}`}
-                    onClick={() => onNeumorphismChange(!neumorphismEnabled)}
-                  >
-                    <span className="settings-switch-thumb" aria-hidden="true" />
-                  </button>
                 </div>
               </div>
             )}

@@ -240,21 +240,6 @@
     color-scheme: light;
 }
 
-/* --- NEUMORPHISM MODE TOGGLE --- */
-:root[data-neumorphism='off'] {
-  --neuo-light: transparent;
-  --neuo-dark: transparent;
-  --neuo-raised-sm: 0 1px 2px var(--border-subtle);
-  --neuo-raised-md: 0 4px 10px var(--border-subtle);
-  --neuo-raised-lg: 0 10px 24px var(--border-subtle);
-  --neuo-inset-sm: inset 0 0 0 1px var(--border-default);
-  --neuo-inset-md: inset 0 0 0 2px var(--border-default);
-  --shadow-sm: 0 1px 2px var(--border-subtle);
-  --shadow-md: 0 4px 10px var(--border-subtle);
-  --shadow-lg: 0 10px 24px var(--border-subtle);
-  --shadow-xl: 0 18px 40px var(--border-subtle);
-}
-
 /* --- Reset & Base --- */
 *,
 *::before,
@@ -2916,9 +2901,8 @@ body {
 }
 
 /* ===========================================
-   NEUMORPHISM ACCESSIBILITY — Focus Rings
-   Explicit outlines for keyboard navigation;
-   do not rely on shadow depth alone.
+   Accessibility — Focus Rings
+   Explicit outlines for keyboard navigation.
    =========================================== */
 
 .btn:focus-visible,

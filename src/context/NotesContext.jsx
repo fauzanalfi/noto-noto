@@ -16,7 +16,7 @@ export function NotesProvider({ children }) {
   const { user, signIn, signOut } = useAuth();
 
   // ── Theme ─────────────────────────────────────────────────────────────────
-  const { theme, setTheme, neumorphismEnabled, setNeumorphismEnabled } =
+  const { theme, setTheme } =
     useTheme();
 
   // ── Notes & notebooks (keyed to the current user) ─────────────────────────
@@ -85,8 +85,6 @@ export function NotesProvider({ children }) {
       // Theme
       theme,
       setTheme,
-      neumorphismEnabled,
-      setNeumorphismEnabled,
 
       // Notes data & actions
       notes,
@@ -126,8 +124,6 @@ export function NotesProvider({ children }) {
       signOut,
       theme,
       setTheme,
-      neumorphismEnabled,
-      setNeumorphismEnabled,
       notes,
       allTags,
       saving,

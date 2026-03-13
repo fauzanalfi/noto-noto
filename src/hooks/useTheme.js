@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'noto-theme';
-const NEUMORPHISM_STORAGE_KEY = 'noto-neumorphism-enabled';
 const VALID_THEMES = ['dark', 'light', 'eyecare'];
 
 export function useTheme() {
@@ -11,14 +10,6 @@ export function useTheme() {
       if (saved && VALID_THEMES.includes(saved)) return saved;
     } catch { /* ignore */ }
     return 'dark';
-  });
-
-  const [neumorphismEnabled, setNeumorphismEnabledState] = useState(() => {
-    try {
-      return localStorage.getItem(NEUMORPHISM_STORAGE_KEY) === 'true';
-    } catch {
-      return false;
-    }
   });
 
   useEffect(() => {
@@ -33,11 +24,6 @@ export function useTheme() {
     }
   }, [theme]);
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-neumorphism', neumorphismEnabled ? 'on' : 'off');
-    localStorage.setItem(NEUMORPHISM_STORAGE_KEY, String(neumorphismEnabled));
-  }, [neumorphismEnabled]);
-
   const setTheme = useCallback((t) => {
     if (VALID_THEMES.includes(t)) setThemeState(t);
   }, []);
@@ -49,15 +35,9 @@ export function useTheme() {
     });
   }, []);
 
-  const setNeumorphismEnabled = useCallback((enabled) => {
-    setNeumorphismEnabledState(Boolean(enabled));
-  }, []);
-
   return {
     theme,
     setTheme,
     cycleTheme,
-    neumorphismEnabled,
-    setNeumorphismEnabled,
   };
 }

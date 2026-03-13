@@ -26,8 +26,6 @@ export default function AppLayout() {
     signOut,
     theme,
     setTheme,
-    neumorphismEnabled,
-    setNeumorphismEnabled,
     notes,
     allTags,
     notesError,
@@ -383,8 +381,6 @@ export default function AppLayout() {
           onClose={() => setShowSettings(false)}
           theme={theme}
           onThemeChange={setTheme}
-          neumorphismEnabled={neumorphismEnabled}
-          onNeumorphismChange={setNeumorphismEnabled}
           user={user}
           onSignOut={signOut}
         />
