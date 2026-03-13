@@ -75,7 +75,7 @@
     --accent-primary-hover: #9485f7;
     --accent-secondary: #5b8def;
     --accent-gradient: linear-gradient(135deg, #7c6aef 0%, #5b8def 100%);
-    --accent-glow: 0 0 20px rgba(124, 106, 239, 0.3);
+    --accent-glow: none;
 
     --text-primary: #e8e8f0;
     --text-secondary: #9d9db8;
@@ -88,17 +88,17 @@
   --border-hover: rgba(255, 255, 255, 0.15);
   --border-accent: rgba(124, 106, 239, 0.4);
 
-  --neuo-light: rgba(255, 255, 255, 0.07);
-  --neuo-dark: rgba(0, 0, 0, 0.5);
-  --neuo-raised-sm: -3px -3px 6px rgba(255, 255, 255, 0.07), 3px 3px 6px rgba(0, 0, 0, 0.5);
-  --neuo-raised-md: -6px -6px 12px rgba(255, 255, 255, 0.07), 6px 6px 12px rgba(0, 0, 0, 0.5);
-  --neuo-raised-lg: -10px -10px 20px rgba(255, 255, 255, 0.07), 10px 10px 20px rgba(0, 0, 0, 0.5);
-  --neuo-inset-sm: inset -3px -3px 5px rgba(255, 255, 255, 0.05), inset 3px 3px 5px rgba(0, 0, 0, 0.4);
-  --neuo-inset-md: inset -5px -5px 9px rgba(255, 255, 255, 0.05), inset 5px 5px 9px rgba(0, 0, 0, 0.4);
+    --neuo-light: transparent;
+    --neuo-dark: transparent;
+    --neuo-raised-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --neuo-raised-md: 0 4px 10px rgba(0, 0, 0, 0.24);
+    --neuo-raised-lg: 0 10px 20px rgba(0, 0, 0, 0.28);
+    --neuo-inset-sm: none;
+    --neuo-inset-md: none;
   --shadow-sm: var(--neuo-raised-sm);
   --shadow-md: var(--neuo-raised-md);
   --shadow-lg: var(--neuo-raised-lg);
-  --shadow-xl: -14px -14px 28px rgba(255, 255, 255, 0.07), 14px 14px 28px rgba(0, 0, 0, 0.55);
+    --shadow-xl: 0 18px 36px rgba(0, 0, 0, 0.34);
 
     --para-projects: #ef6a6a;
     --para-areas: #efb86a;
@@ -135,7 +135,7 @@
     --accent-primary-hover: #7f71ed;
     --accent-secondary: #4a80e0;
     --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #4a80e0 100%);
-    --accent-glow: 0 0 16px rgba(108, 92, 231, 0.2);
+    --accent-glow: none;
 
     --text-primary: #1a1a2e;
     --text-secondary: #5a5a72;
@@ -148,17 +148,17 @@
   --border-hover: rgba(0, 0, 0, 0.15);
   --border-accent: rgba(108, 92, 231, 0.3);
 
-  --neuo-light: #ffffff;
-  --neuo-dark: rgba(185, 186, 194, 0.72);
-  --neuo-raised-sm: -3px -3px 6px #ffffff, 3px 3px 6px rgba(185, 186, 194, 0.72);
-  --neuo-raised-md: -6px -6px 12px #ffffff, 6px 6px 12px rgba(185, 186, 194, 0.72);
-  --neuo-raised-lg: -10px -10px 20px #ffffff, 10px 10px 20px rgba(185, 186, 194, 0.72);
-  --neuo-inset-sm: inset -3px -3px 5px #ffffff, inset 3px 3px 5px rgba(185, 186, 194, 0.62);
-  --neuo-inset-md: inset -5px -5px 9px #ffffff, inset 5px 5px 9px rgba(185, 186, 194, 0.62);
+    --neuo-light: transparent;
+    --neuo-dark: transparent;
+    --neuo-raised-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+    --neuo-raised-md: 0 6px 16px rgba(15, 23, 42, 0.12);
+    --neuo-raised-lg: 0 12px 24px rgba(15, 23, 42, 0.16);
+    --neuo-inset-sm: none;
+    --neuo-inset-md: none;
   --shadow-sm: var(--neuo-raised-sm);
   --shadow-md: var(--neuo-raised-md);
   --shadow-lg: var(--neuo-raised-lg);
-  --shadow-xl: -14px -14px 28px #ffffff, 14px 14px 28px rgba(185, 186, 194, 0.75);
+    --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.16);
 
     --para-projects: #e05252;
     --para-areas: #e0a030;
@@ -195,7 +195,7 @@
     --accent-primary-hover: #9e8568;
     --accent-secondary: #7a8f5e;
     --accent-gradient: linear-gradient(135deg, #8b7355 0%, #7a8f5e 100%);
-    --accent-glow: 0 0 16px rgba(139, 115, 85, 0.2);
+    --accent-glow: none;
 
     --text-primary: #3d3224;
     --text-secondary: #6b5e4e;
@@ -208,17 +208,17 @@
   --border-hover: rgba(80, 60, 30, 0.18);
   --border-accent: rgba(139, 115, 85, 0.35);
 
-  --neuo-light: #fffdf8;
-  --neuo-dark: rgba(163, 145, 115, 0.58);
-  --neuo-raised-sm: -3px -3px 6px #fffdf8, 3px 3px 6px rgba(163, 145, 115, 0.58);
-  --neuo-raised-md: -6px -6px 12px #fffdf8, 6px 6px 12px rgba(163, 145, 115, 0.58);
-  --neuo-raised-lg: -10px -10px 20px #fffdf8, 10px 10px 20px rgba(163, 145, 115, 0.58);
-  --neuo-inset-sm: inset -3px -3px 5px #fffdf8, inset 3px 3px 5px rgba(163, 145, 115, 0.48);
-  --neuo-inset-md: inset -5px -5px 9px #fffdf8, inset 5px 5px 9px rgba(163, 145, 115, 0.48);
+    --neuo-light: transparent;
+    --neuo-dark: transparent;
+    --neuo-raised-sm: 0 1px 2px rgba(97, 74, 43, 0.1);
+    --neuo-raised-md: 0 6px 16px rgba(97, 74, 43, 0.14);
+    --neuo-raised-lg: 0 12px 24px rgba(97, 74, 43, 0.18);
+    --neuo-inset-sm: none;
+    --neuo-inset-md: none;
   --shadow-sm: var(--neuo-raised-sm);
   --shadow-md: var(--neuo-raised-md);
   --shadow-lg: var(--neuo-raised-lg);
-  --shadow-xl: -14px -14px 28px #fffdf8, 14px 14px 28px rgba(163, 145, 115, 0.62);
+    --shadow-xl: 0 20px 40px rgba(97, 74, 43, 0.18);
 
     --para-projects: #c45a5a;
     --para-areas: #c49040;
@@ -888,9 +888,9 @@ body {
 }
 
 .view-mode-btn.active {
-  background: var(--accent-primary);
-  color: white;
-  box-shadow: -2px -2px 4px rgba(255,255,255,0.1), 2px 2px 4px rgba(0,0,0,0.35), var(--accent-glow);
+    background: var(--accent-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
 }
 
 /* Editor + Preview Area */
@@ -1268,16 +1268,16 @@ body {
   background: var(--accent-primary);
   color: white;
   border: none;
-  box-shadow: -4px -4px 8px rgba(255, 255, 255, 0.1), 4px 4px 8px rgba(0, 0, 0, 0.35), var(--accent-glow);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-primary:hover {
   background: var(--accent-primary-hover);
-  box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.12), 4px 4px 10px rgba(0, 0, 0, 0.4), var(--accent-glow);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-primary:active {
-  box-shadow: inset -3px -3px 6px rgba(255, 255, 255, 0.1), inset 3px 3px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
 }
 
 .btn-danger {
@@ -2713,14 +2713,14 @@ body {
 .settings-nav-item:hover {
   background: var(--bg-primary);
   color: var(--text-primary);
-  box-shadow: inset -3px 0 5px rgba(255, 255, 255, 0.04), inset 3px 0 5px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
 }
 
 .settings-nav-item.active {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-weight: 500;
-  box-shadow: inset -3px -3px 5px rgba(255, 255, 255, 0.05), inset 3px 3px 5px rgba(0, 0, 0, 0.35);
+    box-shadow: none;
 }
 
 .settings-content {
