@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { formatDate } from '../utils';
+import { Plus, MoreHorizontal } from 'lucide-react';
+import { formatDate, extractSnippet } from '../utils';
 
 const COLUMNS = [
   { id: 'backlog', label: 'Backlog', color: 'var(--text-tertiary)' },
@@ -60,12 +60,12 @@ export default function KanbanBoard({ notes, activeNoteId, onSelectNote, onCreat
             <span className="kanban-col-title">{col.label}</span>
             <span className="kanban-col-count">{notesByCol[col.id].length}</span>
             <button
-              className="kanban-add-btn"
-              onClick={onCreateNote}
-              title={`Add note to ${col.label}`}
-              aria-label={`Add note to ${col.label}`}
+              className="kanban-col-menu-btn"
+              type="button"
+              title={`${col.label} options`}
+              aria-label={`${col.label} options`}
             >
-              <Plus size={13} />
+              <MoreHorizontal size={14} />
             </button>
           </div>
 
@@ -83,6 +83,7 @@ export default function KanbanBoard({ notes, activeNoteId, onSelectNote, onCreat
                 onKeyDown={(e) => e.key === 'Enter' && onSelectNote(note.id)}
               >
                 <div className="kanban-card-title">{note.title || 'Untitled'}</div>
+                <div className="kanban-card-snippet">{extractSnippet(note.content)}</div>
                 {note.tags?.length > 0 && (
                   <div className="kanban-card-tags">
                     {note.tags.slice(0, 3).map((tag) => (
@@ -93,6 +94,17 @@ export default function KanbanBoard({ notes, activeNoteId, onSelectNote, onCreat
                 <div className="kanban-card-date">{formatDate(note.updatedAt)}</div>
               </div>
             ))}
+
+            <button
+              className="kanban-add-task-card"
+              onClick={onCreateNote}
+              title={`Add task in ${col.label}`}
+              aria-label={`Add task in ${col.label}`}
+              type="button"
+            >
+              <Plus size={14} />
+              <span>Add Task</span>
+            </button>
           </div>
         </div>
       ))}

@@ -2,11 +2,11 @@
 
   <img src="public/favicon.svg" alt="Noto Logo" width="72" />
 
-  <h1>Noto 2.0</h1>
+  <h1>Noto 3.0</h1>
   <p><strong>Your second brain, beautifully organised.</strong></p>
 
   [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000?style=flat-square&logo=vercel)](https://fauzanalfi.github.io/noto-noto)
-  [![Version](https://img.shields.io/badge/version-2.0.0-blueviolet?style=flat-square)](CHANGELOG.md)
+  [![Version](https://img.shields.io/badge/version-3.0.0-blueviolet?style=flat-square)](CHANGELOG.md)
   [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev)
   [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
   [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
@@ -35,14 +35,12 @@
 - **Demo Mode** — Runs without Firebase credentials using localStorage (used on demo deployment)
 - **Google Auth** — Secure sign-in; notes are private to each account
 
-### New in 2.0
-- **Onboarding flow** — First-run 3-step modal (Welcome → Create your first notebook with PARA category → Quick Switcher tip)
-- **Settings modal** — 2-pane overlay covering Account, Appearance, Editor, and About (keyboard shortcuts reference)
-- **Mobile bottom tab bar** — Native-feeling tab bar on small screens for Notes, Kanban, Tasks, and Settings
-- **Expanded keyboard shortcuts** — `⌘1`–`⌘4` switch view modes and toggle Zen; `⌘S` flashes a saved confirmation; `⌘F` focuses the search box; `Esc` dismisses overlays in priority order
-- **Refreshed login screen** — Single centred card with wordmark and tagline (replaces the old two-panel hero layout)
-- **Design system** — Fully documented token set (colours, spacing, typography, motion) across 3 themes; see [`docs/design-system/`](docs/design-system/)
-- **Micro-interactions** — Button press scale, card lift on drag, `modalIn` / `quickSwitcherIn` spring animations throughout
+### New in 3.0
+- **Brand refresh** — Noto is now branded as **Noto 3.0** across product documentation.
+- **Editorial redesign direction** — Design system now captures the latest “Digital Curator” direction: content-first layout, tonal depth, and reduced visual noise.
+- **Design principles update** — Added explicit guidance for no-line boundaries, tonal layering, and focused motion.
+- **Typography direction update** — Documentation now specifies dual-voice typography (sans for UI chrome, serif for long-form reading contexts).
+- **Token documentation update** — Design token metadata bumped to `3.0.0` to reflect the redesign documentation release.
 
 ## 🖼️ Screenshots
 
@@ -165,11 +163,11 @@ noto-noto/
 ├── src/
 │   ├── components/
 │   │   ├── Editor.jsx
-│   │   ├── LoginScreen.jsx   # Noto 2.0 centred-card login
+│   │   ├── LoginScreen.jsx   # Noto 3.0 centred-card login
 │   │   ├── NotesList.jsx
 │   │   ├── NoteToolbar.jsx
-│   │   ├── Onboarding.jsx    # 3-step first-run modal (new in 2.0)
-│   │   ├── Settings.jsx      # 2-pane settings overlay (new in 2.0)
+│   │   ├── Onboarding.jsx    # 3-step first-run modal
+│   │   ├── Settings.jsx      # 2-pane settings overlay
 │   │   ├── Sidebar.jsx
 │   │   └── …
 │   ├── hooks/          # useNotes, useNoteActions, useAuth, useTheme, …

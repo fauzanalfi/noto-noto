@@ -1,19 +1,20 @@
 # Color System
 
 > **Role:** Apple Principal Designer  
-> **Version:** 1.0 — March 2026
+> **Version:** 3.0 — March 2026
 
 ---
 
 ## 1. Philosophy
 
-Color in Noto serves one purpose: **reducing cognitive friction**. Every hue carries a fixed semantic meaning — it is never decorative. The PARA color language (red for urgency, amber for responsibility, green for abundance, grey for rest) maps directly to the PARA methodology's psychological intent.
+Color in Noto 3.0 serves one purpose: **reducing cognitive friction**. Every hue carries a fixed semantic meaning — it is never decorative. The PARA color language (red for urgency, amber for responsibility, green for abundance, grey for rest) maps directly to the PARA methodology's psychological intent.
 
 **Rules that never break:**
 1. Color is never the sole carrier of meaning — always paired with a label or icon.
 2. Full-saturation color is reserved for the single brand accent and PARA category markers.
-3. Backgrounds shift in luminosity, never in hue.
+3. Background boundaries are expressed through **surface tone shifts**, not hard divider lines.
 4. All three themes (dark, light, eye-care) share the same semantic token names — components never hard-code a hex value.
+5. Glass and gradient treatments are reserved for floating UI and primary CTAs only.
 
 ---
 

@@ -162,6 +162,7 @@ export function NotesProvider({ children }) {
  * Consume the notes/notebooks/auth/theme data layer from any descendant.
  * Throws if used outside of <NotesProvider>.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotesContext() {
   const ctx = useContext(NotesContext);
   if (!ctx) {

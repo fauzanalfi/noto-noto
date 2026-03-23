@@ -1,16 +1,17 @@
 # Typography
 
 > **Role:** Apple Principal Designer  
-> **Version:** 1.0 — March 2026
+> **Version:** 3.0 — March 2026
 
 ---
 
 ## 1. Philosophy
 
-Noto is fundamentally a writing app. Typography is its primary interface. The type system is built around two principles drawn from Apple HIG:
+Noto 3.0 is fundamentally a writing app with an editorial reading posture. Typography is its primary interface. The type system is built around three principles drawn from Apple HIG and the latest redesign:
 
 1. **Optical hierarchy over rigid size ratios** — the gap between heading levels is tuned for visual weight, not mathematical intervals.
 2. **Reading first, interface second** — body text is 15px (above WCAG's 14px minimum), with 1.6 line-height for sustained reading comfort.
+3. **Dual-voice typography** — sans-serif for product chrome and serif for long-form content.
 
 ---
 
@@ -18,10 +19,12 @@ Noto is fundamentally a writing app. Typography is its primary interface. The ty
 
 ```css
 --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+--font-serif: 'Newsreader', 'Iowan Old Style', 'Times New Roman', serif;
 --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 ```
 
 **`--font-sans`** — Used for all UI chrome: labels, headings, navigation, toolbars, buttons.  
+**`--font-serif`** — Preferred for note titles and long-form rendered note content in editorial mode.  
 **`--font-mono`** — Used for the markdown editor textarea, inline code, code blocks, and keyboard shortcuts.
 
 > **Loading:** Inter is loaded via system fallbacks on macOS/iOS (`-apple-system`). For custom Inter via Google Fonts, add `<link rel="preconnect">` before the font `<link>` in `index.html`.

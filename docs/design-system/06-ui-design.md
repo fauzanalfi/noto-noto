@@ -1,22 +1,24 @@
 # Noto — Full UI Design Specification
 
-> **Role:** Apple Principal Designer, Senior UI Designer  
-> **Version:** 1.0 — March 2026  
+> **Role:** Product Design Lead, Senior UI Designer  
+> **Version:** 3.0 — March 2026  
 > **Standard:** Apple Human Interface Guidelines (macOS + iOS/iPadOS)
 
 ---
 
 ## Designer's Philosophy
 
-Noto is built for the *intentional thinker* — someone who writes to think, not thinks to write. The design draws from three influences: the spatial clarity of Apple's apps (Notes, Reminders, Xcode), the density-without-clutter of Notion's sidebar, and the focused fullness of iA Writer's editing surface.
+Noto 3.0 is built for the *intentional thinker* — someone who writes to think, not thinks to write. The design draws from three influences: the spatial clarity of Apple's apps (Notes, Reminders, Xcode), the density-without-clutter of Notion's sidebar, and editorial reading comfort inspired by modern publishing tools.
 
-The visual language follows three principles:
+The visual language follows four principles:
 
-**1. Substance over chrome.** Every visible pixel earns its place. There are no gradients for decoration, no shadows for depth, no animations for delight alone. When something moves, it communicates.
+**1. Substance over chrome.** Every visible pixel earns its place. Motion and depth are communication tools, not decoration.
 
 **2. Hierarchy through restraint.** Typography scale and spacing carry all the hierarchy. Color is reserved for status (dangerous = red), identity (PARA categories), and accent (interactive). The UI almost disappears when you need to write.
 
 **3. Fluency over features.** Power users don't see the UI — they see the keyboard. `⌘K` for Quick Switcher. `⌘N` for a new note. `⌘1–4` for view modes. The mouse is optional. VoiceOver support is mandatory.
+
+**4. Tonal depth over hard lines.** Section boundaries are expressed through layered surfaces and contrast shifts; visible dividers are minimized.
 
 ---
 

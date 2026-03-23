@@ -1,4 +1,14 @@
-import { Menu, ArrowLeft, FileText, LayoutGrid, CheckSquare, Settings as SettingsIcon } from 'lucide-react';
+import {
+  Menu,
+  ArrowLeft,
+  FileText,
+  LayoutGrid,
+  CheckSquare,
+  Search,
+  Command,
+  Bell,
+  Settings as SettingsIcon,
+} from 'lucide-react';
 import { useNotesContext } from '../context/NotesContext';
 import { useUIContext } from '../context/UIContext';
 import Sidebar from './Sidebar';
@@ -57,7 +67,6 @@ export default function AppLayout() {
     setActiveTag,
     searchQuery,
     setSearchQuery,
-    viewMode,
     setViewMode,
     showEditor,
     zenMode,
@@ -145,6 +154,7 @@ export default function AppLayout() {
         onThemeChange={setTheme}
         user={user}
         onOpenSettings={() => setShowSettings(true)}
+        onCreateNote={handleCreateNote}
       />
 
       <div
@@ -161,6 +171,85 @@ export default function AppLayout() {
           minHeight: 0,
         }}
       >
+        <header className="app-top-nav" role="banner">
+          <div className="app-top-nav-left">
+            <button
+              className={`app-top-nav-link ${
+                ['all', 'pinned', 'tag', 'notebook'].includes(activeView)
+                  ? 'active'
+                  : ''
+              }`}
+              onClick={() => setActiveView('all')}
+            >
+              Notes
+            </button>
+            <button
+              className={`app-top-nav-link ${
+                activeView === 'kanban' ? 'active' : ''
+              }`}
+              onClick={() => setActiveView('kanban')}
+            >
+              Projects
+            </button>
+            <button
+              className={`app-top-nav-link ${
+                activeView === 'tasks' ? 'active' : ''
+              }`}
+              onClick={() => setActiveView('tasks')}
+            >
+              Tasks
+            </button>
+          </div>
+
+          <label className="app-top-nav-search" aria-label="Search notes">
+            <Search size={16} className="icon" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Find insights..."
+            />
+          </label>
+
+          <div className="app-top-nav-actions">
+            <button
+              className="app-top-nav-icon-btn"
+              onClick={() => setShowQuickSwitcher(true)}
+              title="Quick Switcher"
+              aria-label="Open quick switcher"
+            >
+              <Command size={16} />
+            </button>
+            <button
+              className="app-top-nav-icon-btn"
+              title="Notifications"
+              aria-label="Notifications"
+              type="button"
+            >
+              <Bell size={16} />
+            </button>
+            <button
+              className="app-top-nav-icon-btn"
+              onClick={() => setShowSettings(true)}
+              title="Settings"
+              aria-label="Open settings"
+            >
+              <SettingsIcon size={16} />
+            </button>
+            <button
+              className="app-top-nav-avatar"
+              onClick={() => setShowSettings(true)}
+              title={user?.displayName || user?.email || 'User profile'}
+              aria-label="Open profile settings"
+            >
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="" />
+              ) : (
+                <span>{user?.displayName?.[0] || user?.email?.[0] || '?'}</span>
+              )}
+            </button>
+          </div>
+        </header>
+
         {/* Mobile top header */}
         <div className="mobile-header">
           {showEditor ? (
@@ -215,6 +304,7 @@ export default function AppLayout() {
               <NotesList
                 className={showEditor ? 'hidden' : ''}
                 notes={filteredNotes}
+                activeView={activeView}
                 activeNoteId={activeNote?.id ?? null}
                 onSelectNote={handleSelectNote}
                 onCreateNote={handleCreateNote}
@@ -229,36 +319,40 @@ export default function AppLayout() {
 
               {activeNote ? (
                 <div
-                  className={`editor-panel ${!showEditor ? 'hidden' : ''}`}
+                  className={`editor-panel ${!showEditor ? 'hidden' : ''}${
+                    zenMode || normalizedViewMode === 'edit' ? ' focused-editor' : ''
+                  }`}
                   style={!showEditor && isMobile ? { display: 'none' } : {}}
                 >
-                  <NoteToolbar
-                    activeNote={activeNote}
-                    activeNoteNotebook={activeNoteNotebook}
-                    notebooks={notebooks}
-                    moveToNotebook={moveToNotebook}
-                    togglePin={togglePin}
-                    deleteNote={deleteNote}
-                    restoreNote={restoreNote}
-                    permanentlyDeleteNote={permanentlyDeleteNote}
-                    duplicateNote={handleDuplicateNote}
-                    saveStatus={saveStatus}
-                    notesError={notesError}
-                    notes={notes}
-                    filteredNotes={filteredNotes}
-                    listTitle={listTitle}
-                    exportNoteAsMarkdown={exportNoteAsMarkdown}
-                    exportAllNotesAsMarkdownZip={exportAllNotesAsMarkdownZip}
-                    exportCurrentListAsMarkdownZip={
-                      exportCurrentListAsMarkdownZip
-                    }
-                    isMobile={isMobile}
-                    zenMode={zenMode}
-                    onToggleZenMode={setZenMode}
-                    viewMode={normalizedViewMode}
-                    onViewModeChange={setViewMode}
-                    onBackToList={handleBackToList}
-                  />
+                  {!zenMode && (
+                    <NoteToolbar
+                      activeNote={activeNote}
+                      activeNoteNotebook={activeNoteNotebook}
+                      notebooks={notebooks}
+                      moveToNotebook={moveToNotebook}
+                      togglePin={togglePin}
+                      deleteNote={deleteNote}
+                      restoreNote={restoreNote}
+                      permanentlyDeleteNote={permanentlyDeleteNote}
+                      duplicateNote={handleDuplicateNote}
+                      saveStatus={saveStatus}
+                      notesError={notesError}
+                      notes={notes}
+                      filteredNotes={filteredNotes}
+                      listTitle={listTitle}
+                      exportNoteAsMarkdown={exportNoteAsMarkdown}
+                      exportAllNotesAsMarkdownZip={exportAllNotesAsMarkdownZip}
+                      exportCurrentListAsMarkdownZip={
+                        exportCurrentListAsMarkdownZip
+                      }
+                      isMobile={isMobile}
+                      zenMode={zenMode}
+                      onToggleZenMode={setZenMode}
+                      viewMode={normalizedViewMode}
+                      onViewModeChange={setViewMode}
+                      onBackToList={handleBackToList}
+                    />
+                  )}
 
                   <input
                     className="editor-title-input"
@@ -281,6 +375,8 @@ export default function AppLayout() {
                         note={activeNote}
                         onUpdateNote={updateNote}
                         notes={notes}
+                        zenMode={zenMode}
+                        onExitZenMode={() => setZenMode(false)}
                         onNavigateNote={handleSelectNote}
                       />
                     )}
@@ -298,6 +394,19 @@ export default function AppLayout() {
                       />
                     )}
                   </div>
+
+                  {showEditor && activeNote && (
+                    <div className="floating-save-indicator" role="status" aria-live="polite">
+                      <span className={`dot${saveStatus === 'error' ? ' error' : ''}`} />
+                      <span>
+                        {saveStatus === 'saving'
+                          ? 'Saving...'
+                          : saveStatus === 'error'
+                            ? 'Save failed'
+                            : 'Auto-saved'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <EmptyState
@@ -368,6 +477,8 @@ export default function AppLayout() {
       {showQuickSwitcher && (
         <QuickSwitcher
           notes={notes}
+          notebooks={notebooks}
+          onCreateNote={handleCreateNote}
           onSelect={(id) => {
             handleSelectNote(id);
             setShowQuickSwitcher(false);

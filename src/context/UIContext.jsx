@@ -29,16 +29,18 @@ export function UIProvider({ children }) {
     user,
     notes,
     notebooks,
-    allTags,
     saving,
     notesError,
     createNote,
-    updateNote,
     addTag,
     removeTag,
     duplicateNote,
     getFilteredNotes,
   } = useNotesContext();
+
+  // ── Search ─────────────────────────────────────────────────────────────────
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // ── View selection ─────────────────────────────────────────────────────────
   const [activeView, setActiveViewRaw] = useState('all');
@@ -51,10 +53,6 @@ export function UIProvider({ children }) {
     setActiveViewRaw(view);
     setSearchQuery('');
   }, []);
-
-  // ── Search ─────────────────────────────────────────────────────────────────
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // ── Editor / layout toggles ────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState('split-horizontal');
@@ -375,7 +373,6 @@ export function UIProvider({ children }) {
       handleAddTag,
       handleRemoveTag,
       handleDuplicateNote,
-      updateNote,
     ],
   );
 
@@ -386,6 +383,7 @@ export function UIProvider({ children }) {
  * Consume the UI-layer state from any descendant.
  * Throws if used outside of <UIProvider>.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUIContext() {
   const ctx = useContext(UIContext);
   if (!ctx) {

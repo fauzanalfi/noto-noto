@@ -1,6 +1,6 @@
-# Noto Design System
+# Noto 3.0 Design System
 
-> **Version:** 1.0 — March 2026  
+> **Version:** 3.0 — March 2026  
 > **Stack:** React 19 · Vite 7 · Plain CSS · Firebase  
 > **Themes:** Dark (default) · Light · Eyecare  
 > **Standard:** Apple Human Interface Guidelines · WCAG 2.1 AA
@@ -18,6 +18,18 @@
 | Understand PARA architecture | [PARA Patterns](04-patterns/para-system.md) |
 | Set up the dev environment | [Dev Setup](05-dev-guide/setup.md) |
 | See all 12 UI screens | [UI Design Spec](06-ui-design.md) |
+
+---
+
+## Noto 3.0 Redesign Direction
+
+- **Creative north star:** The Digital Curator — editorial, calm, and content-first.
+- **No-line rule:** section boundaries are defined by tonal surface steps, not visible 1px separators.
+- **Tonal depth first:** depth comes from layered surfaces; shadows are reserved for high-priority overlays.
+- **Typography split:** UI chrome stays in Inter, while long-form note content adopts a serif voice.
+- **Focused motion:** transitions communicate context changes; decorative animation is avoided.
+
+Canonical redesign exploration files live in `stitch_noto_redesign_plan/` and should be treated as visual input for this documentation set.
 
 ---
 
@@ -123,6 +135,7 @@
 1. **Substance over chrome** — every visible pixel earns its place
 2. **Hierarchy through restraint** — typography and spacing carry all hierarchy; color is status + identity + accent only
 3. **Fluency over features** — power users operate through keyboard shortcuts, not menus
+4. **Editorial focus** — reading and writing comfort takes precedence over dashboard density
 
 ---
 

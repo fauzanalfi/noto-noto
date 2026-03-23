@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## v3.0.0 - 2026-03-23
+
+### Added
+
+- **Noto 3.0 design-system direction** — Added a dedicated redesign direction section in `docs/design-system/index.md`, including the Digital Curator creative north star, no-line boundaries, tonal layering, and focused-motion guidance.
+
+### Changed
+
+- **Branding** — Rebranded documentation from Noto 2.0 to **Noto 3.0** in `README.md` and design-system docs.
+- **Design system foundations** — Updated `color.md`, `typography.md`, `elevation.md`, and `06-ui-design.md` to align with the latest redesign language and principles.
+- **Token metadata** — Updated `docs/design-system/02-tokens/tokens.json` metadata version to `3.0.0` and date to `2026-03-23`.
+- **README release section** — Replaced “New in 2.0” with “New in 3.0” and updated release highlights to focus on the redesign documentation refresh.
+
+### Quality
+
+- Documentation pass completed for consistency across design-system entry docs, project README, and changelog.
+
 ## v2.0.0 - 2026-03-06
 
 ### Added

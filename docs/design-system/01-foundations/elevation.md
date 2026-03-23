@@ -1,13 +1,13 @@
 # Elevation & Depth
 
 > **Role:** Apple Principal Designer  
-> **Version:** 1.0 — March 2026
+> **Version:** 3.0 — March 2026
 
 ---
 
 ## 1. Depth Model
 
-Noto uses a **three-material layer model** inspired by Apple's layered canvas approach. Each layer has a distinct background and shadow that communicates its elevation above the base surface.
+Noto 3.0 uses a **three-material layer model** with tonal layering as the default depth signal. Each layer has a distinct background, while shadows are reserved for overlays and critical floating affordances.
 
 ```
 Layer 3 — Overlay     (Modals, Quick Switcher, Popovers)
@@ -47,7 +47,7 @@ The three main columns (sidebar, notes list, editor) all sit at this level. Dist
 ```css
 background: var(--bg-card);     /* or --bg-secondary */
 box-shadow: var(--shadow-sm);   /* on hover */
-border: 1px solid var(--border-subtle);
+border: none;
 ```
 Applied to: note cards (hover), inline dropdowns, the sidebar itself.
 
@@ -55,7 +55,7 @@ Applied to: note cards (hover), inline dropdowns, the sidebar itself.
 ```css
 background: var(--bg-card);
 box-shadow: var(--shadow-lg);
-border: 1px solid var(--border-default);
+border: 1px solid color-mix(in srgb, var(--border-default) 15%, transparent);
 ```
 Applied to: context menus, Quick Switcher, modals, popovers, tooltips.
 

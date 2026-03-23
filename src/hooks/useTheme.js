@@ -19,8 +19,8 @@ export function useTheme() {
     // Update meta theme-color for PWA
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
-      const colors = { dark: '#1a1b2e', light: '#f5f5f7', eyecare: '#f5f0e8' };
-      metaTheme.setAttribute('content', colors[theme] || '#1a1b2e');
+      const colors = { dark: '#0e0e10', light: '#f9fafb', eyecare: '#f4ecd8' };
+      metaTheme.setAttribute('content', colors[theme] || '#0e0e10');
     }
   }, [theme]);
 

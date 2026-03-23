@@ -2,7 +2,7 @@ import { useRef, useCallback, useState, useMemo } from 'react';
 import { countWords } from '../utils';
 import {
   Bold, Italic, Strikethrough, Heading1, Heading2, Heading3,
-  List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus, Table
+  List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus, Table, Minimize2
 } from 'lucide-react';
 
 const TOOLBAR_GROUPS = [
@@ -45,7 +45,13 @@ const TOOLBAR_GROUPS = [
 
 const WIKI_DROPDOWN_BLUR_DELAY = 150; // ms – lets click events fire before hiding dropdown
 
-export default function Editor({ note, onUpdateNote, notes = [] }) {
+export default function Editor({
+  note,
+  onUpdateNote,
+  notes = [],
+  zenMode = false,
+  onExitZenMode,
+}) {
   const textareaRef = useRef(null);
   const [showTableModal, setShowTableModal] = useState(false);
   const [tableRows, setTableRows] = useState(2);
@@ -307,7 +313,12 @@ export default function Editor({ note, onUpdateNote, notes = [] }) {
   return (
     <div className="markdown-editor-wrap">
       {/* Formatting Toolbar */}
-      <div className="editor-toolbar" style={{ borderBottom: 'none', paddingLeft: 'var(--space-xl)' }} role="toolbar" aria-label="Markdown formatting">
+      <div
+        className={`editor-toolbar${zenMode ? ' floating' : ''}`}
+        style={{ borderBottom: 'none', paddingLeft: zenMode ? 'var(--space-md)' : 'var(--space-xl)' }}
+        role="toolbar"
+        aria-label="Markdown formatting"
+      >
         {TOOLBAR_GROUPS.map((group, gi) => (
           <div key={group.group} style={{ display: 'contents' }}>
             {gi > 0 && <div className="toolbar-divider" aria-hidden="true" />}
@@ -329,6 +340,21 @@ export default function Editor({ note, onUpdateNote, notes = [] }) {
             </div>
           </div>
         ))}
+
+        {zenMode && (
+          <>
+            <div className="toolbar-divider" aria-hidden="true" />
+            <button
+              className="toolbar-btn zen-exit-btn"
+              onClick={() => onExitZenMode?.()}
+              title="Exit Zen Mode"
+              aria-label="Exit Zen Mode"
+            >
+              <Minimize2 className="icon" size={16} aria-hidden="true" />
+              <span>Exit Zen</span>
+            </button>
+          </>
+        )}
       </div>
 
       {showTableModal && (

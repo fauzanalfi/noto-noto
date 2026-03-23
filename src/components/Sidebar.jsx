@@ -44,6 +44,7 @@ export default function Sidebar({
   onThemeChange,
   user,
   onOpenSettings,
+  onCreateNote,
 }) {
   const [expandedCategories, setExpandedCategories] = useState({
     projects: true,
@@ -92,15 +93,17 @@ export default function Sidebar({
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
-        <div className="sidebar-logo">N</div>
-        <div className="sidebar-brand">
-          Noto<span>.</span>
-        </div>
+        <div className="sidebar-brand solo">Noto</div>
+      </div>
+
+      <div className="sidebar-para-meta">
+        <div className="sidebar-para-label">PARA SYSTEM</div>
+        <p className="sidebar-para-subtitle">The Editorial Intelligence</p>
       </div>
 
       <nav className="sidebar-nav">
         <div className="sidebar-section">
-          <div className="sidebar-section-title">Quick Access</div>
+          <div className="sidebar-section-title">Workspace</div>
           <button
             className={`sidebar-item ${activeView === 'all' ? 'active' : ''}`}
             onClick={() => handleNavClick('all')}
@@ -327,6 +330,15 @@ export default function Sidebar({
 
       {/* Theme Switcher */}
       <div className="sidebar-footer">
+        <button
+          className="sidebar-create-note-btn"
+          onClick={() => onCreateNote?.()}
+          type="button"
+        >
+          <Plus size={16} />
+          <span>New Note</span>
+        </button>
+
         {/* User info */}
         {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '0 2px' }}>

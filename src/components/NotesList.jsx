@@ -12,6 +12,7 @@ const SORT_OPTIONS = [
 export default function NotesList({
   className = '',
   notes,
+  activeView = 'all',
   activeNoteId,
   onSelectNote,
   onCreateNote,
@@ -35,16 +36,56 @@ export default function NotesList({
     return arr;
   }, [notes, sortBy]);
 
+  const isDashboardAllNotes = !isTrash && !effectiveBoardView && activeView === 'all';
+  const pinnedNotes = useMemo(() => sortedNotes.filter((note) => note.pinned), [sortedNotes]);
+  const recentNotes = useMemo(() => sortedNotes.filter((note) => !note.pinned), [sortedNotes]);
+
+  const renderNoteCard = (note) => (
+    <div
+      key={note.id}
+      className={`note-card ${activeNoteId === note.id ? 'active' : ''}`}
+      onClick={() => onSelectNote(note.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelectNote(note.id);
+        }
+      }}
+      aria-label={`Note: ${note.title || 'Untitled Note'}`}
+    >
+      <div className="note-card-title">
+        {note.title || 'Untitled Note'}
+      </div>
+      <div className="note-card-snippet">
+        {extractSnippet(note.content)}
+      </div>
+      {note.tags.length > 0 && (
+        <div className="note-card-tags">
+          {note.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="tag">#{tag}</span>
+          ))}
+          {note.tags.length > 3 && (
+            <span className="tag">+{note.tags.length - 3}</span>
+          )}
+        </div>
+      )}
+      <div className="note-card-meta">
+        {note.pinned && <Pin size={12} className="pin-icon" />}
+        <span>{formatDate(note.updatedAt)}</span>
+      </div>
+    </div>
+  );
+
   return (
     <div className={`notes-list-panel ${className}`.trim()} style={{ position: 'relative' }}>
-      {/* Header */}
       <div className="notes-list-header">
         <h2>{title || 'All Notes'}</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)' }}>
             {notes.length} note{notes.length !== 1 ? 's' : ''}
           </span>
-          {/* Board / List toggle */}
           {!isTrash && !forcedBoardView && (
             <button
               className="toolbar-btn"
@@ -56,7 +97,6 @@ export default function NotesList({
               {effectiveBoardView ? <List size={12} /> : <LayoutGrid size={12} />}
             </button>
           )}
-          {/* Sort button */}
           <div style={{ position: 'relative' }}>
             <button
               className="toolbar-btn"
@@ -77,7 +117,10 @@ export default function NotesList({
                     <button
                       key={opt.id}
                       className={`context-menu-item ${sortBy === opt.id ? 'active' : ''}`}
-                      onClick={() => { setSortBy(opt.id); setShowSortMenu(false); }}
+                      onClick={() => {
+                        setSortBy(opt.id);
+                        setShowSortMenu(false);
+                      }}
                     >
                       {opt.label}{sortBy === opt.id ? ' ✓' : ''}
                     </button>
@@ -89,7 +132,6 @@ export default function NotesList({
         </div>
       </div>
 
-      {/* Empty Trash action */}
       {isTrash && notes.length > 0 && (
         <div style={{ padding: '0 var(--space-md) var(--space-sm)' }}>
           <button
@@ -107,7 +149,6 @@ export default function NotesList({
         </div>
       )}
 
-      {/* Search */}
       <div className="search-box">
         <Search className="icon" size={16} aria-hidden="true" />
         <input
@@ -119,7 +160,6 @@ export default function NotesList({
         />
       </div>
 
-      {/* Notes — list or board */}
       {effectiveBoardView && !isTrash ? (
         <KanbanBoard
           notes={notes}
@@ -129,57 +169,43 @@ export default function NotesList({
           onUpdateNote={onUpdateNote}
         />
       ) : (
-      <div className="notes-list-scroll">
-        {notes.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-tertiary)' }}>
-            <p style={{ fontSize: 'var(--font-size-sm)' }}>No notes found</p>
-            <p style={{ fontSize: 'var(--font-size-xs)', marginTop: '4px' }}>
-              Create a new note to get started
-            </p>
-          </div>
-        ) : (
-          sortedNotes.map((note) => (
-            <div
-              key={note.id}
-              className={`note-card ${activeNoteId === note.id ? 'active' : ''}`}
-              onClick={() => onSelectNote(note.id)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSelectNote(note.id);
-                }
-              }}
-              aria-label={`Note: ${note.title || 'Untitled Note'}`}
-            >
-              <div className="note-card-title">
-                {note.title || 'Untitled Note'}
-              </div>
-              <div className="note-card-snippet">
-                {extractSnippet(note.content)}
-              </div>
-              <div className="note-card-meta">
-                {note.pinned && <Pin size={12} className="pin-icon" />}
-                <span>{formatDate(note.updatedAt)}</span>
-              </div>
-              {note.tags.length > 0 && (
-                <div className="note-card-tags">
-                  {note.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="tag">#{tag}</span>
-                  ))}
-                  {note.tags.length > 3 && (
-                    <span className="tag">+{note.tags.length - 3}</span>
-                  )}
-                </div>
-              )}
+        <div className={`notes-list-scroll ${isDashboardAllNotes ? 'dashboard-scroll' : ''}`.trim()}>
+          {notes.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-tertiary)' }}>
+              <p style={{ fontSize: 'var(--font-size-sm)' }}>No notes found</p>
+              <p style={{ fontSize: 'var(--font-size-xs)', marginTop: '4px' }}>
+                Create a new note to get started
+              </p>
             </div>
-          ))
-        )}
-      </div>
+          ) : isDashboardAllNotes ? (
+            <div className="notes-sections">
+              {pinnedNotes.length > 0 && (
+                <section className="notes-section">
+                  <div className="notes-section-title">
+                    <Pin size={11} className="icon" />
+                    <span>Pinned</span>
+                  </div>
+                  <div className="notes-section-list">
+                    {pinnedNotes.map(renderNoteCard)}
+                  </div>
+                </section>
+              )}
+
+              <section className="notes-section">
+                <div className="notes-section-title">
+                  <span>Recent</span>
+                </div>
+                <div className="notes-section-list">
+                  {(recentNotes.length > 0 ? recentNotes : pinnedNotes).map(renderNoteCard)}
+                </div>
+              </section>
+            </div>
+          ) : (
+            sortedNotes.map(renderNoteCard)
+          )}
+        </div>
       )}
 
-      {/* FAB: New Note */}
       <button className="new-note-btn" onClick={onCreateNote} title="New Note" aria-label="Create new note">
         <Plus size={22} />
       </button>
