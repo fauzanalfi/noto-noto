@@ -8,6 +8,7 @@ import {
   Command,
   Bell,
   Settings as SettingsIcon,
+  BookMarked,
 } from 'lucide-react';
 import { useNotesContext } from '../context/NotesContext';
 import { useUIContext } from '../context/UIContext';
@@ -23,6 +24,8 @@ import TagManager from './TagManager';
 import TasksView from './TasksView';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
+import ReferenceManager from './ReferenceManager';
+import CitationPicker from './CitationPicker';
 import {
   exportNoteAsMarkdown,
   exportAllNotesAsMarkdownZip,
@@ -95,6 +98,10 @@ export default function AppLayout() {
     handleAddTag,
     handleRemoveTag,
     handleDuplicateNote,
+    showCitationPicker,
+    setShowCitationPicker,
+    showReferenceManager,
+    setShowReferenceManager,
   } = useUIContext();
 
   // ── Auth loading / login gates ─────────────────────────────────────────────
@@ -198,6 +205,14 @@ export default function AppLayout() {
               onClick={() => setActiveView('tasks')}
             >
               Tasks
+            </button>
+            <button
+              className="app-top-nav-link"
+              onClick={() => setShowReferenceManager(true)}
+              title="Open Reference Library"
+            >
+              <BookMarked size={14} style={{ marginRight: 4 }} />
+              References
             </button>
           </div>
 
@@ -351,6 +366,7 @@ export default function AppLayout() {
                       viewMode={normalizedViewMode}
                       onViewModeChange={setViewMode}
                       onBackToList={handleBackToList}
+                      onCite={() => setShowCitationPicker(true)}
                     />
                   )}
 
@@ -501,6 +517,21 @@ export default function AppLayout() {
         <Onboarding
           onComplete={() => setShowOnboarding(false)}
           onCreateNotebook={createNotebook}
+        />
+      )}
+
+      {showReferenceManager && <ReferenceManager />}
+
+      {showCitationPicker && (
+        <CitationPicker
+          onInsert={(citation) => {
+            if (activeNote) {
+              const separator = activeNote.content ? '\n\n' : '';
+              updateNote(activeNote.id, {
+                content: (activeNote.content || '') + separator + citation,
+              });
+            }
+          }}
         />
       )}
     </div>

@@ -3,6 +3,7 @@ import { useNotes } from '../hooks/useNotes';
 import { useNotebooks } from '../hooks/useNotebooks';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
+import { useReferences } from '../hooks/useReferences';
 
 const NotesContext = createContext(null);
 
@@ -46,6 +47,14 @@ export function NotesProvider({ children }) {
     deleteNotebook,
     moveNotebookCategory,
   } = useNotebooks(user?.uid);
+
+  // ── References ────────────────────────────────────────────────────────────
+  const {
+    references,
+    createReference,
+    updateReference,
+    deleteReference,
+  } = useReferences(user?.uid);
 
   // ── Derived counts (used by Sidebar badges) ───────────────────────────────
   const noteCountByNotebook = useMemo(() => {
@@ -111,6 +120,12 @@ export function NotesProvider({ children }) {
       deleteNotebook,
       moveNotebookCategory,
 
+      // References data & actions
+      references,
+      createReference,
+      updateReference,
+      deleteReference,
+
       // Derived counts
       noteCountByNotebook,
       totalNotes,
@@ -150,6 +165,10 @@ export function NotesProvider({ children }) {
       pinnedCount,
       trashedCount,
       tasksCount,
+      references,
+      createReference,
+      updateReference,
+      deleteReference,
     ],
   );
 
