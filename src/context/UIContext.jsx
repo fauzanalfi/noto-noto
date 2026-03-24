@@ -64,6 +64,8 @@ export function UIProvider({ children }) {
   const [showQuickSwitcher, setShowQuickSwitcher] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showReferenceManager, setShowReferenceManager] = useState(false);
+  const [showCitationPicker, setShowCitationPicker] = useState(false);
 
   const shouldShowOnboarding =
     showOnboarding || Boolean(user && !localStorage.getItem('noto-onboarded'));
@@ -262,6 +264,8 @@ export function UIProvider({ children }) {
 
       // Escape — close modals / exit zen
       if (e.key === 'Escape') {
+        if (showCitationPicker) { setShowCitationPicker(false); return; }
+        if (showReferenceManager) { setShowReferenceManager(false); return; }
         if (showQuickSwitcher) { setShowQuickSwitcher(false); return; }
         if (showSettings)      { setShowSettings(false);      return; }
         if (shouldShowOnboarding) return; // don't dismiss onboarding with Esc
@@ -273,6 +277,8 @@ export function UIProvider({ children }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
     handleCreateNote,
+    showCitationPicker,
+    showReferenceManager,
     showQuickSwitcher,
     showSettings,
     shouldShowOnboarding,
@@ -314,6 +320,10 @@ export function UIProvider({ children }) {
       showOnboarding,
       setShowOnboarding,
       shouldShowOnboarding,
+      showReferenceManager,
+      setShowReferenceManager,
+      showCitationPicker,
+      setShowCitationPicker,
 
       // Save status
       saveStatus,
@@ -357,6 +367,8 @@ export function UIProvider({ children }) {
       showSettings,
       showOnboarding,
       shouldShowOnboarding,
+      showReferenceManager,
+      showCitationPicker,
       saveStatus,
       isMobile,
       filteredNotes,

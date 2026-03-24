@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import {
   BookOpen, Trash2, RotateCcw, Copy, ArrowLeft,
   ChevronDown, Pin, Maximize2, Minimize2,
-  Edit3, Eye, Columns, Rows3, X,
+  Edit3, Eye, Columns, Rows3, X, Quote,
 } from 'lucide-react';
 import { formatFullDate } from '../utils';
 import MoveToNotebookMenu from './MoveToNotebookMenu';
@@ -32,6 +32,7 @@ export default function NoteToolbar({
   viewMode,
   onViewModeChange,
   onBackToList,
+  onOpenCitationPicker,
 }) {
   const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [moveMenuPos, setMoveMenuPos] = useState({ top: 0, left: 0 });
@@ -169,6 +170,17 @@ export default function NoteToolbar({
           onExportAllMarkdown={exportAllNotesAsMarkdownZip}
           onExportCurrentMarkdown={exportCurrentListAsMarkdownZip}
         />
+
+        {onOpenCitationPicker && (
+          <button
+            className="toolbar-btn"
+            onClick={onOpenCitationPicker}
+            title="Insert citation"
+            aria-label="Insert citation"
+          >
+            <Quote size={15} aria-hidden="true" />
+          </button>
+        )}
 
         {!isMobile && (
           <>

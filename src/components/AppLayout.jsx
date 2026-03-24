@@ -8,6 +8,7 @@ import {
   Command,
   Bell,
   Settings as SettingsIcon,
+  BookOpen,
 } from 'lucide-react';
 import { useNotesContext } from '../context/NotesContext';
 import { useUIContext } from '../context/UIContext';
@@ -23,6 +24,8 @@ import TagManager from './TagManager';
 import TasksView from './TasksView';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
+import ReferenceManager from './ReferenceManager';
+import CitationPicker from './CitationPicker';
 import {
   exportNoteAsMarkdown,
   exportAllNotesAsMarkdownZip,
@@ -79,6 +82,10 @@ export default function AppLayout() {
     setShowSettings,
     shouldShowOnboarding,
     setShowOnboarding,
+    showReferenceManager,
+    setShowReferenceManager,
+    showCitationPicker,
+    setShowCitationPicker,
     saveStatus,
     isMobile,
     filteredNotes,
@@ -198,6 +205,14 @@ export default function AppLayout() {
               onClick={() => setActiveView('tasks')}
             >
               Tasks
+            </button>
+            <button
+              className={`app-top-nav-link ${
+                showReferenceManager ? 'active' : ''
+              }`}
+              onClick={() => setShowReferenceManager(true)}
+            >
+              References
             </button>
           </div>
 
@@ -351,6 +366,7 @@ export default function AppLayout() {
                       viewMode={normalizedViewMode}
                       onViewModeChange={setViewMode}
                       onBackToList={handleBackToList}
+                      onOpenCitationPicker={() => setShowCitationPicker(true)}
                     />
                   )}
 
@@ -463,6 +479,16 @@ export default function AppLayout() {
           <span>Tasks</span>
         </button>
         <button
+          className={`mobile-tab-item ${showReferenceManager ? 'active' : ''}`}
+          onClick={() => setShowReferenceManager(true)}
+          role="tab"
+          aria-selected={showReferenceManager}
+          aria-label="References"
+        >
+          <BookOpen size={22} aria-hidden="true" />
+          <span>Refs</span>
+        </button>
+        <button
           className="mobile-tab-item"
           onClick={() => setShowSettings(true)}
           role="tab"
@@ -494,6 +520,43 @@ export default function AppLayout() {
           onThemeChange={setTheme}
           user={user}
           onSignOut={signOut}
+        />
+      )}
+
+      {showReferenceManager && (
+        <div
+          className="modal-overlay ref-manager-overlay"
+          onClick={(e) => e.target === e.currentTarget && setShowReferenceManager(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Reference Manager"
+        >
+          <div className="ref-manager-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ref-manager-modal-header">
+              <BookOpen size={16} aria-hidden="true" />
+              <h2>Reference Manager</h2>
+              <button
+                className="toolbar-btn"
+                onClick={() => setShowReferenceManager(false)}
+                aria-label="Close Reference Manager"
+                style={{ marginLeft: 'auto' }}
+              >
+                ✕
+              </button>
+            </div>
+            <ReferenceManager />
+          </div>
+        </div>
+      )}
+
+      {showCitationPicker && activeNote && (
+        <CitationPicker
+          onInsert={(text) => {
+            updateNote(activeNote.id, {
+              content: (activeNote.content || '') + text,
+            });
+          }}
+          onClose={() => setShowCitationPicker(false)}
         />
       )}
 

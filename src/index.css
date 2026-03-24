@@ -3542,3 +3542,918 @@ body {
     outline: 2px solid var(--accent-primary);
     outline-offset: 3px;
 }
+
+/* ========================================
+   REFERENCE MANAGER & CITATION PICKER
+   ======================================== */
+
+/* ── Reference Manager Modal ─────────────────────────────────────────────── */
+
+.ref-manager-overlay {
+  align-items: stretch;
+  padding: var(--space-xl);
+}
+
+.ref-manager-modal {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: var(--anim-modal-in);
+}
+
+.ref-manager-modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+
+.ref-manager-modal-header h2 {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+/* ── Reference Manager layout ────────────────────────────────────────────── */
+
+.ref-manager {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ref-list-panel {
+  width: 280px;
+  min-width: 240px;
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-tertiary);
+  flex-shrink: 0;
+}
+
+.ref-detail-panel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-detail-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-xl);
+}
+
+/* ── List panel ──────────────────────────────────────────────────────────── */
+
+.ref-list-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.ref-list-title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.ref-list-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.ref-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-full);
+}
+
+.ref-search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(120, 120, 128, 0.12);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  margin: var(--space-sm) var(--space-md);
+  flex-shrink: 0;
+}
+
+.ref-search-box .icon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.ref-search-box input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  width: 100%;
+}
+
+.ref-search-box input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.ref-search-clear {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.ref-list-count {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  padding: 0 var(--space-md) var(--space-xs);
+}
+
+.ref-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ref-list-empty {
+  padding: var(--space-xl);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.ref-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: background var(--transition-fast);
+}
+
+.ref-list-item:hover {
+  background: var(--bg-hover);
+}
+
+.ref-list-item.active {
+  background: var(--bg-active);
+}
+
+.ref-list-item-icon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.ref-list-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ref-list-item-title {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ref-list-item-meta {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ref-insert-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.ref-list-item:hover .ref-insert-btn {
+  opacity: 1;
+}
+
+.ref-insert-btn:hover {
+  color: var(--accent-primary);
+  background: var(--bg-hover);
+}
+
+/* ── Detail panel ────────────────────────────────────────────────────────── */
+
+.ref-panel-heading {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.ref-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.ref-detail-type-icon {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ref-detail-meta {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.ref-type-badge {
+  font-size: var(--font-size-xs);
+  background: var(--bg-active);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.ref-detail-year {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.ref-detail-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.ref-detail-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: var(--space-sm);
+}
+
+.ref-detail-authors {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.ref-detail-field {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+  line-height: 1.5;
+}
+
+.ref-doi-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.ref-doi-link:hover {
+  text-decoration: underline;
+}
+
+.ref-abstract {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ref-notes-block {
+  margin-top: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.ref-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-md);
+}
+
+/* ── Citation cards ───────────────────────────────────────────────────────── */
+
+.ref-citations-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--space-sm) 0;
+  margin-top: var(--space-md);
+}
+
+.ref-citations-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.citation-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.citation-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.citation-style-badge {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.citation-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.citation-copy-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.citation-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Export panel ────────────────────────────────────────────────────────── */
+
+.ref-export-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.ref-export-hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+.ref-export-preview {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-lg);
+  border: 1px solid var(--border-subtle);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ref-export-entry {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ref-export-entry:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* ── Empty detail ────────────────────────────────────────────────────────── */
+
+.ref-empty-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  color: var(--text-tertiary);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.ref-empty-detail p {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ── Insert button ───────────────────────────────────────────────────────── */
+
+.ref-insert-full-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-lg);
+}
+
+/* ── Reference form ──────────────────────────────────────────────────────── */
+
+.ref-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ref-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ref-field-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ref-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.ref-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.ref-textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+  min-height: 80px;
+}
+
+.ref-textarea:focus {
+  border-color: var(--accent-primary);
+}
+
+.ref-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+}
+
+.ref-select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  padding-right: 28px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.ref-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.ref-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.ref-select-icon {
+  position: absolute;
+  right: 10px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.ref-author-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: 4px;
+}
+
+.ref-author-remove {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.ref-author-remove:hover {
+  color: var(--color-danger);
+}
+
+.ref-add-author-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px dashed var(--border-default);
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  margin-top: 2px;
+}
+
+.ref-add-author-btn:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.ref-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 6px var(--space-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  min-height: 38px;
+  cursor: text;
+}
+
+.ref-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  background: var(--bg-active);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: none;
+}
+
+.ref-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.ref-tag button:hover {
+  color: var(--color-danger);
+}
+
+.ref-tag-readonly {
+  cursor: default;
+}
+
+.ref-tag-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  flex: 1;
+  min-width: 80px;
+}
+
+.ref-tag-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.ref-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Citation Picker modal ───────────────────────────────────────────────── */
+
+.citation-picker {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 580px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: var(--anim-modal-in);
+}
+
+.citation-picker-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+
+.citation-picker-header h2 {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.citation-picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.citation-picker-option-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.citation-picker-option-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.citation-style-tabs {
+  display: flex;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.citation-style-tab {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border-default);
+  padding: 4px 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.citation-style-tab:last-child {
+  border-right: none;
+}
+
+.citation-style-tab.active {
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+}
+
+.citation-style-tab:hover:not(.active) {
+  background: var(--bg-hover);
+}
+
+.citation-page-input {
+  width: 60px;
+  padding: 4px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.citation-page-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.citation-picker-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-xs) 0;
+}
+
+.citation-picker-item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-xl);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.citation-picker-item:hover {
+  background: var(--bg-hover);
+}
+
+.citation-picker-item.active {
+  background: var(--bg-active);
+}
+
+.citation-picker-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.citation-picker-preview {
+  padding: var(--space-md) var(--space-xl);
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.citation-preview-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.citation-preview-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.citation-picker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  flex-shrink: 0;
+}
+
+/* ── Accessibility focus rings ─────────────────────────────────────────── */
+
+.ref-input:focus-visible,
+.ref-textarea:focus-visible,
+.ref-select:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.ref-citations-toggle:focus-visible,
+.ref-add-author-btn:focus-visible,
+.ref-author-remove:focus-visible,
+.citation-copy-btn:focus-visible,
+.citation-style-tab:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ref-list-item:focus-visible,
+.citation-picker-item:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* ── Mobile adaptations ──────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .ref-manager-overlay {
+    padding: var(--space-sm);
+  }
+
+  .ref-manager-modal {
+    max-height: 95vh;
+  }
+
+  .ref-manager {
+    flex-direction: column;
+  }
+
+  .ref-list-panel {
+    width: 100%;
+    min-width: unset;
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .citation-picker {
+    max-height: 95vh;
+  }
+
+  .citation-picker-options {
+    gap: var(--space-sm);
+  }
+}
