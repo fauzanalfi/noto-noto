@@ -28,7 +28,7 @@ function makeWelcomeNote() {
   };
 }
 
-function notesRef(userId) {
+function notesCollectionRef(userId) {
   return collection(db, "users", userId, "notes");
 }
 function noteRef(userId, noteId) {
@@ -44,6 +44,10 @@ export function useNotes(userId) {
   const updateTimers = useRef({});
   const latestUpdateTokenRef = useRef({});
   const hasSeededWelcomeRef = useRef(false);
+  // Always-current notes ref — avoids stale closure in updateNote without
+  // recreating the callback on every keystroke.
+  const notesRef = useRef(notes);
+  notesRef.current = notes;
 
   const trackWrite = useCallback((promise, options = {}) => {
     const { message = "Failed to save note changes.", onError } = options;
@@ -108,6 +112,7 @@ export function useNotes(userId) {
   } = useNoteActions({
     userId,
     notes,
+    notesRef,
     setNotes,
     setSaving,
     setError,
@@ -180,7 +185,7 @@ export function useNotes(userId) {
       setError(null);
     }, 0);
 
-    const notesQuery = query(notesRef(userId), orderBy("updatedAt", "desc"));
+    const notesQuery = query(notesCollectionRef(userId), orderBy("updatedAt", "desc"));
     const unsubscribe = onSnapshot(
       notesQuery,
       (snap) => {
@@ -278,6 +283,65 @@ export function useNotes(userId) {
     [notes],
   );
 
+  // ── Bidirectional link queries ────────────────────────────────────────────
+
+  /** Returns all notes that contain an outgoing link pointing to noteId */
+  const getBacklinks = useCallback(
+    (noteId) =>
+      notes.filter(
+        (n) =>
+          !n.trashed &&
+          n.id !== noteId &&
+          Array.isArray(n.outgoingLinks) &&
+          n.outgoingLinks.some((l) => l.targetId === noteId),
+      ),
+    [notes],
+  );
+
+  /** Returns the resolved note objects that the given note links out to */
+  const getOutgoingLinks = useCallback(
+    (noteId) => {
+      const note = notes.find((n) => n.id === noteId);
+      if (!note || !Array.isArray(note.outgoingLinks)) return [];
+      return note.outgoingLinks
+        .filter((l) => l.targetId !== null)
+        .map((l) => ({ link: l, note: notes.find((n) => n.id === l.targetId) }))
+        .filter((item) => item.note && !item.note.trashed);
+    },
+    [notes],
+  );
+
+  /** Returns outgoing links that could not be resolved (broken links) */
+  const getBrokenLinks = useCallback(
+    (noteId) => {
+      const note = notes.find((n) => n.id === noteId);
+      if (!note || !Array.isArray(note.outgoingLinks)) return [];
+      return note.outgoingLinks.filter((l) => l.targetId === null);
+    },
+    [notes],
+  );
+
+  /** Returns a {nodes, edges} graph of all non-trashed notes and their links */
+  const getLinkGraph = useCallback(() => {
+    const activeNotes = notes.filter((n) => !n.trashed);
+    const nodeIds = new Set(activeNotes.map((n) => n.id));
+    const nodes = activeNotes.map((n) => ({
+      id: n.id,
+      label: n.title || 'Untitled',
+      notebookId: n.notebookId,
+    }));
+    const edges = [];
+    activeNotes.forEach((n) => {
+      if (!Array.isArray(n.outgoingLinks)) return;
+      n.outgoingLinks.forEach((l) => {
+        if (l.targetId && nodeIds.has(l.targetId)) {
+          edges.push({ source: n.id, target: l.targetId });
+        }
+      });
+    });
+    return { nodes, edges };
+  }, [notes]);
+
   return {
     notes,
     loading,
@@ -297,5 +361,9 @@ export function useNotes(userId) {
     clearError: () => setError(null),
     emptyTrash,
     duplicateNote,
+    getBacklinks,
+    getOutgoingLinks,
+    getBrokenLinks,
+    getLinkGraph,
   };
 }

@@ -4,10 +4,12 @@ import {
   setDoc as firebaseSetDoc,
   updateDoc as firebaseUpdateDoc,
 } from 'firebase/firestore';
+import { parseLinksInContent } from '../utils/linkParser';
 
 export function useNoteActions({
   userId,
   notes,
+  notesRef,
   setNotes,
   setSaving,
   setError,
@@ -47,6 +49,7 @@ export function useNoteActions({
       pinned: false,
       trashed: false,
       status: 'backlog',
+      outgoingLinks: [],
     };
     setNotes((prev) => [note, ...prev]);
     trackWrite(setDocFn(noteRef(userId, note.id), note), {
@@ -59,6 +62,14 @@ export function useNoteActions({
   const updateNote = useCallback((id, updates) => {
     if (!userId) return;
     const updated = { ...updates, updatedAt: new Date().toISOString() };
+    // Parse [[wiki links]] and store resolved links when content changes.
+    // Use notesRef.current (always fresh) to avoid stale closure over notes.
+    if (updates.content !== undefined) {
+      updated.outgoingLinks = parseLinksInContent(
+        updates.content,
+        notesRef ? notesRef.current : notes,
+      );
+    }
     const updateToken = Date.now() + Math.random();
     setLatestUpdateToken(id, updateToken);
 

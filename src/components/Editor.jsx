@@ -1,5 +1,6 @@
 import { useRef, useCallback, useState, useMemo } from 'react';
 import { countWords } from '../utils';
+import BacklinksPanel from './BacklinksPanel';
 import {
   Bold, Italic, Strikethrough, Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare, Code, Link, Image, Quote, Minus, Table, Minimize2
@@ -51,6 +52,8 @@ export default function Editor({
   notes = [],
   zenMode = false,
   onExitZenMode,
+  getBacklinks,
+  onNavigateNote,
 }) {
   const textareaRef = useRef(null);
   const [showTableModal, setShowTableModal] = useState(false);
@@ -67,6 +70,11 @@ export default function Editor({
         (n.title || 'Untitled').toLowerCase().includes(wikiQuery.toLowerCase()))
       .slice(0, 8);
   }, [wikiQuery, wikiPos, notes, note]);
+
+  const backlinks = useMemo(
+    () => (getBacklinks && note ? getBacklinks(note.id) : []),
+    [getBacklinks, note],
+  );
 
   const insertMarkdown = useCallback(
     (before, after = '', placeholder = '') => {
@@ -439,6 +447,9 @@ export default function Editor({
         <span>·</span>
         <span>~{Math.max(1, Math.ceil(countWords(note.content) / 200))} min read</span>
       </div>
+
+      {/* Backlinks */}
+      <BacklinksPanel backlinks={backlinks} onNavigate={onNavigateNote} />
     </div>
   );
 }

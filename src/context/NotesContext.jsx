@@ -38,6 +38,10 @@ export function NotesProvider({ children }) {
     emptyTrash,
     duplicateNote,
     error: notesError,
+    getBacklinks,
+    getOutgoingLinks,
+    getBrokenLinks,
+    getLinkGraph,
   } = useNotes(user?.uid);
 
   const {
@@ -130,6 +134,12 @@ export function NotesProvider({ children }) {
       deleteReference,
       searchReferences,
 
+      // Link graph helpers
+      getBacklinks,
+      getOutgoingLinks,
+      getBrokenLinks,
+      getLinkGraph,
+
       // Derived counts
       noteCountByNotebook,
       totalNotes,
@@ -175,6 +185,10 @@ export function NotesProvider({ children }) {
       updateReference,
       deleteReference,
       searchReferences,
+      getBacklinks,
+      getOutgoingLinks,
+      getBrokenLinks,
+      getLinkGraph,
     ],
   );
 

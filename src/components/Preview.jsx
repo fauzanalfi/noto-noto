@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js/lib/core';
@@ -64,6 +64,8 @@ function resolveWikiLinks(content, notes) {
 }
 
 export default function Preview({ content, notes = [], onNavigateNote }) {
+  const [tooltip, setTooltip] = useState(null); // { x, y, note }
+
   const html = useMemo(() => {
     if (!content) return '<p style="color: var(--text-tertiary); font-style: italic;">Nothing to preview yet...</p>';
     try {
@@ -88,11 +90,53 @@ export default function Preview({ content, notes = [], onNavigateNote }) {
     }
   };
 
+  const handleMouseOver = useCallback((e) => {
+    const link = e.target.closest('a.wiki-link[data-note-id]');
+    if (!link) return;
+    const noteId = link.dataset.noteId;
+    const target = notes.find((n) => n.id === noteId);
+    if (!target) return;
+    const rect = link.getBoundingClientRect();
+    setTooltip({
+      x: rect.left,
+      y: rect.bottom + 6,
+      note: target,
+    });
+  }, [notes]);
+
+  const handleMouseOut = useCallback((e) => {
+    const link = e.target.closest('a.wiki-link[data-note-id]');
+    if (link) setTooltip(null);
+  }, []);
+
   return (
-    <div
-      className="markdown-preview"
-      dangerouslySetInnerHTML={{ __html: html }}
-      onClick={handleClick}
-    />
+    <>
+      <div
+        className="markdown-preview"
+        dangerouslySetInnerHTML={{ __html: html }}
+        onClick={handleClick}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}
+      />
+      {tooltip && (
+        <div
+          className="link-preview-tooltip"
+          style={{ left: tooltip.x, top: tooltip.y }}
+          role="tooltip"
+        >
+          <div className="link-preview-tooltip__title">
+            {tooltip.note.title || 'Untitled'}
+          </div>
+          {tooltip.note.content && (
+            <div className="link-preview-tooltip__snippet">
+              {tooltip.note.content.replace(/[#*`[\]]/g, '').trim().slice(0, 200)}
+            </div>
+          )}
+          <div className="link-preview-tooltip__meta">
+            {new Date(tooltip.note.updatedAt).toLocaleDateString()}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

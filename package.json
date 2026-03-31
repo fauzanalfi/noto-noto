@@ -13,6 +13,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "cytoscape": "^3.33.1",
     "dompurify": "^3.3.0",
     "firebase": "^12.9.0",
     "highlight.js": "^11.11.1",

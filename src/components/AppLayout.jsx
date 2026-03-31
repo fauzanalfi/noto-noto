@@ -9,6 +9,7 @@ import {
   Bell,
   Settings as SettingsIcon,
   BookOpen,
+  GitBranch,
 } from 'lucide-react';
 import { useNotesContext } from '../context/NotesContext';
 import { useUIContext } from '../context/UIContext';
@@ -26,13 +27,16 @@ import Onboarding from './Onboarding';
 import Settings from './Settings';
 import ReferenceManager from './ReferenceManager';
 import CitationPicker from './CitationPicker';
+import GraphView from './GraphView';
 import {
   exportNoteAsMarkdown,
   exportAllNotesAsMarkdownZip,
   exportCurrentListAsMarkdownZip,
 } from '../utils';
+import { useState } from 'react';
 
 export default function AppLayout() {
+  const [showGraphView, setShowGraphView] = useState(false);
   const {
     user,
     signIn,
@@ -59,6 +63,8 @@ export default function AppLayout() {
     pinnedCount,
     trashedCount,
     tasksCount,
+    getBacklinks,
+    getLinkGraph,
   } = useNotesContext();
 
   const {
@@ -213,6 +219,14 @@ export default function AppLayout() {
               onClick={() => setShowReferenceManager(true)}
             >
               References
+            </button>
+            <button
+              className={`app-top-nav-link ${showGraphView ? 'active' : ''}`}
+              onClick={() => setShowGraphView(true)}
+              title="Open note graph view"
+            >
+              <GitBranch size={14} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+              Graph
             </button>
           </div>
 
@@ -394,6 +408,7 @@ export default function AppLayout() {
                         zenMode={zenMode}
                         onExitZenMode={() => setZenMode(false)}
                         onNavigateNote={handleSelectNote}
+                        getBacklinks={getBacklinks}
                       />
                     )}
                     {(normalizedViewMode === 'split-horizontal' ||
@@ -564,6 +579,19 @@ export default function AppLayout() {
         <Onboarding
           onComplete={() => setShowOnboarding(false)}
           onCreateNotebook={createNotebook}
+        />
+      )}
+
+      {showGraphView && (
+        <GraphView
+          getLinkGraph={getLinkGraph}
+          activeNoteId={activeNote?.id ?? null}
+          notebooks={notebooks}
+          onClose={() => setShowGraphView(false)}
+          onNavigateNote={(id) => {
+            handleSelectNote(id);
+            setShowGraphView(false);
+          }}
         />
       )}
     </div>

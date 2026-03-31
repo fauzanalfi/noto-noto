@@ -3063,6 +3063,276 @@ body {
 }
 
 /* ========================================
+   BACKLINKS PANEL
+   ======================================== */
+.backlinks-panel {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+}
+
+.backlinks-panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: 100%;
+  text-align: left;
+  transition: color var(--transition-fast);
+}
+
+.backlinks-panel__header:hover {
+  color: var(--text-primary);
+}
+
+.backlinks-panel--empty .backlinks-panel__header {
+  cursor: default;
+}
+
+.backlinks-panel__count {
+  margin-left: auto;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.backlinks-panel__empty-msg {
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+.backlinks-panel__empty-msg code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+}
+
+.backlinks-panel__list {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.backlinks-panel__item {
+  padding: var(--space-sm) var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-fast);
+}
+
+.backlinks-panel__item:hover {
+  border-color: var(--accent-primary);
+}
+
+.backlinks-panel__item-title {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--accent-primary);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: color var(--transition-fast);
+}
+
+.backlinks-panel__item-title:hover {
+  color: var(--accent-primary-hover);
+  text-decoration: underline;
+}
+
+.backlinks-panel__item-snippet {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ========================================
+   LINK PREVIEW TOOLTIP
+   ======================================== */
+.link-preview-tooltip {
+  position: fixed;
+  z-index: var(--z-tooltip, 9000);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-md);
+  max-width: 320px;
+  min-width: 200px;
+  pointer-events: none;
+  animation: fadeIn var(--transition-fast) ease;
+}
+
+.link-preview-tooltip__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link-preview-tooltip__snippet {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.link-preview-tooltip__meta {
+  margin-top: var(--space-xs);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   GRAPH VIEW
+   ======================================== */
+.graph-view-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: var(--z-modal, 1000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn var(--transition-fast) ease;
+}
+
+.graph-view-modal {
+  width: min(96vw, 1200px);
+  height: min(90vh, 800px);
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.graph-view-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.graph-view-header h2 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.graph-view-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  flex-wrap: wrap;
+}
+
+.graph-view-controls label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.graph-view-search {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  width: 160px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.graph-view-search:focus {
+  border-color: var(--accent-primary);
+}
+
+.graph-view-body {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.graph-view-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.graph-view-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--space-md);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.graph-view-node-info {
+  position: absolute;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  pointer-events: none;
+  max-width: 240px;
+}
+
+.graph-view-node-info strong {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* ========================================
    MOBILE BOTTOM TAB BAR
    ======================================== */
 .mobile-tab-bar {
